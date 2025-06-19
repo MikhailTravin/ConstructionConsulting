@@ -1,0 +1,361 @@
+h2 {
+    width: 100%;
+    font-weight: 250;
+    font-size: 24px;
+    line-height: 57px;
+    text-transform: uppercase;
+    color: #676767;
+    text-align: center;
+    @media (max-width: $mobile) {
+        font-size: 20px;
+    }
+    @media (max-width: $mobileSmall) {
+        font-size: 18px;
+    }
+}
+
+//========================================================================================================================================================
+
+.banner-nd {
+    position: relative;
+    height: 556px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    @media (max-width: $tablet) {
+        height: 100%;
+        min-height: 100%;
+    }
+    // .banner-nd__bg
+    &__bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    // .banner-nd__container
+    &__container {
+        display: flex;
+        justify-content: flex-end;
+        width: calc(100% - 30px);
+    }
+    // .banner-nd__content
+    &__content {
+        width: 408px;
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        margin: 25px 15px 0px 0px;
+        @media (max-width: $pc) {
+            margin: 20px 0px 20px 0px;
+        }
+        @media (max-width: $tablet) {
+            height: 100%;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+    }
+    // .banner-nd__body
+    &__body {
+        position: relative;
+        z-index: 11;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        h1 {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            font-size: 25px;
+            line-height: 160%;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: $white;
+
+            span {
+                display: block;
+                position: relative;
+                z-index: 10;
+            }
+            @media (max-width: $tablet) {
+                font-size: 24px;
+            }
+            @media (max-width: $mobile) {
+                font-size: 20px;
+            }
+        }
+    }
+    // .banner-nd__title
+    &__title {
+        position: relative;
+        padding: 25px 35px 20px 36px;
+        width: 100%;
+        @media (max-width: $tablet) {
+            padding: 20px;
+        }
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            background: url("../img/bg-4.webp") 0 0 no-repeat;
+        }
+    }
+    // .banner-nd__bottom
+    &__bottom {
+        margin: 30px 0px 0px 0px;
+        @media (max-width: $tablet) {
+            margin: 20px 0px 0px 0px;
+        }
+    }
+    // .banner-nd__text
+    &__text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        width: 100%;
+        padding: 25px 35px 25px 38px;
+        @media (max-width: $tablet) {
+            padding: 20px;
+        }
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            background: url("../img/bg-4.webp") 0 0 no-repeat;
+        }
+        p {
+            position: relative;
+            z-index: 10;
+            font-weight: 400;
+            font-size: 15px;
+            line-height: 150%;
+            color: $white;
+            margin: 0px 0px 20px 0px;
+            @media (max-width: $mobile) {
+                font-size: 14px;
+                margin: 0px 0px 20px 0px;
+            }
+            @media (max-width: $mobileSmall) {
+                font-size: 12px;
+            }
+        }
+    }
+    // .banner-nd__button
+    &__button {
+        position: relative;
+        z-index: 10;
+        color: $white;
+        margin: 10px 0px 0px -40px;
+        @media (max-width: $pc) {
+            margin: 0px 0px 0px 0px;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+    }
+}
+
+.nd {
+    // .nd__content
+    &__content {
+    }
+    // .nd__body
+    &__body {
+    }
+    // .nd__column
+    &__column {
+        padding: 44px 0px 90px 0px;
+        background-color: $white;
+        &:nth-child(even) {
+            background-color: #f7f7f7;
+            padding: 44px 0px 50px 0px;
+            h2 {
+                margin: 0px 0px 60px 0px;
+                @media (max-width: $tablet) {
+                    margin: 0px 0px 25px 0px;
+                }
+            }
+        }
+        &:nth-child(3) {
+            padding: 25px 0px 120px 0px;
+            h2 {
+                margin: 0px 0px 55px 0px;
+                @media (max-width: $tablet) {
+                    margin: 0px 0px 25px 0px;
+                }
+            }
+        }
+        h2 {
+            font-size: 18px;
+            margin: 0px 0px 30px 0px;
+            @media (max-width: $tablet) {
+                margin: 0px 0px 25px 0px;
+            }
+        }
+    }
+    // .nd__container
+    &__container {
+    }
+    // .nd__item
+    &__item {
+        display: flex;
+        ul {
+            margin: -18.5px 0px;
+            @media (max-width: $mobile) {
+                margin: -10px 0px;
+            }
+            li {
+                padding: 18.5px 0px;
+                @media (max-width: $mobile) {
+                    padding: 10px 0px;
+                }
+                a {
+                    font-size: 17px;
+                    text-decoration: underline;
+                    color: #101010;
+                    font-weight: 300;
+                    transition: color 0.3s ease 0s;
+                    &:hover {
+                        color: $red;
+                    }
+                    @media (max-width: $mobile) {
+                        font-size: 14px;
+                    }
+                    @media (max-width: $mobileSmall) {
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+    }
+    // .nd__image
+    &__image {
+        flex: 0 0 100px;
+        margin: 0px 66px 0px 0px;
+        @media (max-width: $mobile) {
+            display: none;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    }
+}
+
+.leader {
+    background-color: #f7f7f7;
+    // .leader__container
+    &__container {
+    }
+    // .leader__content
+    &__content {
+        display: flex;
+        justify-content: space-between;
+        @media (max-width: $mobile) {
+            flex-direction: column;
+            justify-content: start;
+        }
+    }
+    // .leader__images
+    &__images {
+        position: relative;
+        flex: 0 1 400px;
+        margin: 0px 30px 0px 0px;
+        @media (max-width: $mobile) {
+            flex: 1 1 auto;
+            margin: 0px 0px 0px 0px;
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+    // .leader__desc
+    &__desc {
+        position: absolute;
+        bottom: 30px;
+        right: -135px;
+        z-index: 10;
+        max-width: 320px;
+        background-color: #c9c9c9;
+        padding: 21px 30px 28px 32px;
+        margin: 0px 0px 0px 10px;
+        @media (max-width: $tablet) {
+            right: -15px;
+        }
+        @media (max-width: $mobile) {
+            padding: 15px;
+        }
+    }
+    // .leader__name
+    &__name {
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 147%;
+        color: #2c2c2c;
+        @media (max-width: $mobile) {
+            font-size: 14px;
+        }
+        @media (max-width: $mobileSmall) {
+            font-size: 12px;
+        }
+    }
+    // .leader__subname
+    &__subname {
+        font-weight: 100;
+        font-size: 15px;
+        line-height: 147%;
+        color: #2c2c2c;
+        @media (max-width: $mobile) {
+            font-size: 14px;
+        }
+        @media (max-width: $mobileSmall) {
+            font-size: 12px;
+        }
+    }
+    // .leader__text
+    &__text {
+        padding: 43px 10px 43px 0px;
+        flex: 0 1 610px;
+        @media (max-width: $pc) {
+            padding: 40px 0px;
+        }
+        @media (max-width: $mobile) {
+            flex: 1 1 auto;
+            padding: 20px 0px;
+        }
+        p {
+            font-weight: 400;
+            font-size: 15px;
+            line-height: 150%;
+            color: #2c2c2c;
+            margin: 0px 0px 20px 0px;
+            &:last-child {
+                margin: 0px 0px 0px 0px;
+            }
+            &.bold {
+                font-weight: 700;
+            }
+            @media (max-width: $mobile) {
+                font-size: 12px;
+                margin: 0px 0px 20px 0px;
+            }
+        }
+    }
+}

@@ -1,0 +1,1317 @@
+.banner {
+    position: relative;
+    min-height: 722px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    @media (max-width: $tablet) {
+        height: 100%;
+        min-height: 100%;
+    }
+    // .banner__bg
+    &__bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 722px;
+        @media (max-width: 1920px) {
+            object-fit: cover;
+        }
+        @media (max-width: $pc) {
+            height: 100%;
+        }
+    }
+    // .banner__container
+    &__container {
+        display: flex;
+        justify-content: flex-end;
+        width: calc(100% - 30px);
+    }
+    // .banner__content
+    &__content {
+        width: 488px;
+        position: relative;
+        z-index: 10;
+        min-height: 722px;
+        padding: 68px 15px 55px 33px;
+        display: flex;
+        align-items: flex-end;
+        overflow: hidden;
+        @media (max-width: $tablet) {
+            width: 70%;
+            height: 100%;
+            min-height: 100%;
+        }
+        @media (max-width: $mobile) {
+            padding: 20px 15px;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            background: url("../img/bg-2.webp") 0 0 no-repeat;
+        }
+    }
+    // .banner__body
+    &__body {
+        position: relative;
+        z-index: 11;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        @media (max-width: $mobile) {
+            padding: 20px 0px 0px 0px;
+        }
+        h1 {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            font-weight: 300;
+            font-size: 29px;
+            line-height: 175%;
+            text-transform: uppercase;
+            color: $white;
+            margin: 0px 0px 25px 0px;
+            span {
+                font-weight: 700;
+            }
+            @media (max-width: $tablet) {
+                font-size: 24px;
+                margin: 0px 0px 30px 0px;
+            }
+            @media (max-width: $mobile) {
+                font-size: 20px;
+                margin: 0px 0px 20px 0px;
+            }
+        }
+    }
+    // .banner__text
+    &__text {
+        width: 100%;
+        margin: 0px 0px 40px 0px;
+        @media (max-width: $mobile) {
+            margin: 0px 0px 20px 0px;
+        }
+        p {
+            font-weight: 400;
+            font-size: 20px;
+            line-height: 134%;
+            color: $white;
+            margin: 0px 0px 40px 0px;
+            &.other-p {
+                font-size: 14px;
+                line-height: 155%;
+                padding: 0px 20px 0px 0px;
+                @media (max-width: $mobileSmall) {
+                    font-size: 12px;
+                }
+            }
+            &:last-child {
+                margin: 0px 0px 0px 0px;
+            }
+            @media (max-width: $mobile) {
+                font-size: 14px;
+                margin: 0px 0px 20px 0px;
+            }
+            @media (max-width: $mobileSmall) {
+                font-size: 12px;
+            }
+        }
+    }
+    // .banner__button
+    &__button {
+        color: $white;
+        padding: 10px 22px;
+        margin: 0px 0px 0px -10px;
+        @media (max-width: $pc) {
+            margin: 0px 0px 0px 0px;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+    }
+}
+
+//========================================================================================================================================================
+
+.consulting-services {
+    padding: 40px 0px 50px 0px;
+    @media (max-width: $mobile) {
+        padding: 40px 0px;
+    }
+    // .consulting-services__container
+    &__container {
+    }
+    // .consulting-services__content
+    &__content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        h2 {
+            font-weight: 300;
+            margin: 0px 0px 30px 0px;
+        }
+    }
+    // .consulting-services__body
+    &__body {
+    }
+    // .consulting-services__column
+    &__column {
+        margin: 0px 0px 70px 0px;
+        @media (max-width: $tablet) {
+            margin: 0px 0px 50px 0px;
+        }
+        @media (max-width: $mobile) {
+            margin: 0px 0px 30px 0px;
+        }
+        &:last-child {
+            margin: 0px 0px 0px 0px;
+        }
+    }
+    // .consulting-services__title
+    &__title {
+        margin: 0px 0px 45px 0px;
+        display: flex;
+        align-items: flex-end;
+        font-weight: 300;
+        font-size: 18px;
+        color: #2a2a2a;
+        @media (max-width: $mobile) {
+            font-size: 14px;
+            margin: 0px 0px 20px 0px;
+        }
+        span {
+            flex: 0 1 auto;
+        }
+        &::after {
+            content: "";
+            flex: 1 1 auto;
+            margin: 0px 0px 5px 20px;
+            border: 1px solid #dbdbdb;
+            @media (max-width: $mobile) {
+                display: none;
+            }
+        }
+    }
+    // .consulting-services__items
+    &__items {
+        display: flex;
+        //flex-wrap: wrap;
+        margin: -10px;
+        @media (max-width: $mobileSmall) {
+            flex-direction: column;
+            margin: -10px 0px;
+        }
+    }
+    // .consulting-services__item
+    &__item {
+        flex: 0 1 365px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        &:nth-child(1) {
+            flex: 1 0 405px;
+            @media (max-width: $pc) {
+                flex: 0 1 33.3333%;
+            }
+        }
+        @media (max-width: $pc) {
+            flex: 0 1 33.3333%;
+        }
+        @media (max-width: $mobile) {
+            flex: 0 1 50%;
+        }
+        @media (max-width: $mobileSmall) {
+            flex: 1 1 auto;
+            padding: 10px 0px;
+        }
+        span {
+            font-size: 24px;
+            line-height: 110%;
+            color: #252525;
+            font-weight: 500;
+            @media (max-width: $tablet) {
+                font-size: 22px;
+            }
+            @media (max-width: $mobile) {
+                font-size: 18px;
+            }
+        }
+    }
+    // .consulting-services__icon
+    &__icon {
+        flex: 1 1 auto;
+        height: 117px;
+        margin: 0px 0px 5px 0px;
+        align-items: flex-end;
+        display: flex;
+        @media (max-width: $mobile) {
+            height: 80px;
+        }
+        img {
+            max-height: 100%;
+            max-width: 100%;
+        }
+    }
+    // .consulting-services__button
+    &__button {
+        width: 170px;
+        margin: 65px 0px 0px -20px;
+        @media (max-width: $pc) {
+            margin: 65px 0px 0px 0px;
+        }
+        @media (max-width: $mobile) {
+            margin: 30px 0px 0px 0px;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+    }
+}
+
+//========================================================================================================================================================
+
+.banner-sale {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    min-height: 476px;
+    @media (max-width: $pc) {
+        min-height: 100%;
+    }
+    // .banner-sale__bg
+    &__bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    // .banner-sale__container
+    &__container {
+        position: relative;
+        display: flex;
+        justify-content: flex-end;
+        width: calc(100% - 30px);
+    }
+    // .banner-sale__content
+    &__content {
+        width: 476px;
+        position: relative;
+        z-index: 10;
+        margin: 0px 35px 0px 0px;
+        padding: 25px 30px 20px 40px;
+        display: flex;
+        overflow: hidden;
+        min-height: 480px;
+        @media (max-width: $pc) {
+            margin: 0px 0px 0px 0px;
+            min-height: 100%;
+        }
+        @media (max-width: $tablet) {
+            width: 70%;
+            height: 100%;
+            min-height: 100%;
+        }
+        @media (max-width: $mobile) {
+            padding: 20px 15px;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            background: url("../img/bg-1.webp") 0 0 no-repeat;
+        }
+    }
+    // .banner-sale__logo
+    &__logo {
+        position: absolute;
+        top: 25px;
+        left: 20px;
+        z-index: 6;
+        width: 288px;
+        height: auto;
+        @media (max-width: $tablet) {
+            display: none;
+        }
+    }
+    // .banner-sale__body
+    &__body {
+        position: relative;
+        z-index: 12;
+    }
+    // .banner-sale__title
+    &__title {
+        width: 100%;
+        font-size: 24px;
+        text-transform: uppercase;
+        color: #010000;
+        font-weight: 700;
+        line-height: 40px;
+        margin: 0px 0px 23px 0px;
+        @media (max-width: $mobile) {
+            font-size: 20px;
+            margin: 0px 0px 20px 0px;
+            br {
+                display: none;
+            }
+        }
+    }
+    // .banner-sale__text
+    &__text {
+        p {
+            font-size: 15px;
+            line-height: 21px;
+            color: #000000;
+            font-weight: 300;
+            margin: 0px 0px 40px 0px;
+            &:last-child {
+                margin: 0px 0px 0px 0px;
+            }
+            @media (max-width: $mobile) {
+                font-size: 14px;
+                margin: 0px 0px 20px 0px;
+            }
+            @media (max-width: $mobileSmall) {
+                font-size: 12px;
+            }
+        }
+    }
+
+    // .banner-sale__colors
+
+    &__colors {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        margin: 30px 35px 25px 25px;
+        gap: 20px;
+        @media (max-width: $tablet) {
+            margin: 30px 0px 25px 0px;
+        }
+        @media (max-width: $mobile) {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: -5px;
+            padding: 20px 0px 20px 0px;
+            gap: 0px;
+        }
+    }
+
+    // .banner-sale__color
+
+    &__color {
+        @media (max-width: $mobile) {
+            flex: 0 1 33.3333%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px;
+        }
+        img {
+            width: 65px;
+            height: 65px;
+        }
+        span {
+            font-size: 12px;
+            line-height: 21px;
+            color: #010000;
+            font-weight: 300;
+            text-align: center;
+            display: block;
+            margin: 11px -5px 0px 0px;
+            @media (max-width: $mobile) {
+                margin: 10px 0px 0px 0px;
+            }
+        }
+    }
+
+    // .banner-sale__button
+
+    &__button {
+        margin: 0px 0px 0px -18px;
+        padding: 12px 20px;
+        @media (max-width: $pc) {
+            margin: 0px 0px 0px 0px;
+        }
+    }
+}
+
+//========================================================================================================================================================
+
+.material {
+    padding: 50px 0px 80px 0px;
+    border-bottom: 1px solid #ada8a8;
+    @media (max-width: $mobile) {
+        padding: 40px 0px;
+    }
+    // .material__container
+    &__container {
+    }
+    // .material__content
+    &__content {
+        h2 {
+            margin: 0px 0px 75px 0px;
+            @media (max-width: $tablet) {
+                margin: 0px 0px 60px 0px;
+            }
+            @media (max-width: $mobile) {
+                margin: 0px 0px 30px 0px;
+            }
+        }
+    }
+    // .material__body
+    &__body {
+        display: flex;
+        flex-wrap: wrap;
+        margin: -50px;
+        @media (max-width: $tablet) {
+            margin: -20px;
+        }
+        @media (max-width: $mobile) {
+            flex-direction: column;
+            margin: -20px 0px;
+        }
+    }
+    // .material__column
+    &__column {
+        flex: 0 1 50%;
+        padding: 50px;
+        @media (max-width: $tablet) {
+            padding: 20px;
+        }
+        @media (max-width: $mobile) {
+            flex: 1 1 auto;
+            padding: 20px 0px;
+        }
+    }
+    // .material__item
+    &__item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+    }
+    // .material__image
+    &__image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 426px;
+        width: 100%;
+        background-color: #f7f7f7;
+        border-radius: 12px;
+        margin: 0px 0px 35px 0px;
+        padding: 30px;
+        @media (max-width: $tablet) {
+            height: 300px;
+        }
+        @media (max-width: $mobile) {
+            margin: 0px 0px 25px 0px;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    }
+    // .material__title
+    &__title {
+        flex: 1 1 auto;
+        font-size: 18px;
+        text-transform: uppercase;
+        color: #4b4b4b;
+        font-weight: 700;
+        margin: 0px 0px 42px 0px;
+        @media (max-width: $mobile) {
+            font-size: 14px;
+            margin: 0px 0px 20px 0px;
+        }
+    }
+    // .material__button
+    &__button {
+        padding: 10px 22px;
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+    }
+}
+
+//========================================================================================================================================================
+
+.products {
+    padding: 40px 0px 85px 0px;
+    @media (max-width: $mobile) {
+        padding: 40px 0px;
+    }
+    // .products__container
+    &__container {
+    }
+    // .products__content
+    &__content {
+        h2 {
+            color: #4b4b4b;
+            margin: 0px 0px 35px 0px;
+            @media (max-width: $mobile) {
+                margin: 0px 0px 30px 0px;
+            }
+        }
+    }
+    // .products__body
+    &__body {
+        display: flex;
+        flex-wrap: wrap;
+        margin: -15px -25px;
+        @media (max-width: $tablet) {
+            flex-direction: column;
+            margin: -15px 0px;
+        }
+    }
+    // .products__column
+    &__column {
+        flex: 0 1 50%;
+        padding: 15px 25px;
+        &:nth-child(even) {
+            padding: 15px 25px 15px 12px;
+            @media (max-width: $pc) {
+                padding: 0px 0px 0px 0px;
+            }
+        }
+        &:nth-child(odd) {
+            .products__image {
+                width: calc(100% + 10px);
+                @media (max-width: $pc) {
+                    width: 100%;
+                }
+            }
+        }
+        @media (max-width: $tablet) {
+            flex: 1 1 auto;
+            padding: 15px 0px;
+        }
+    }
+    // .products__item
+    &__item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    // .products__text
+    &__text {
+        width: 100%;
+        margin: 0px 0px 43px 0px;
+        @media (max-width: $tablet) {
+            margin: 0px 0px 30px 0px;
+        }
+        p {
+            font-size: 15px;
+            line-height: 21px;
+            color: #000000;
+            font-weight: 300;
+            margin: 0px 0px 20px 0px;
+            &:last-child {
+                margin: 0px 0px 0px 0px;
+            }
+            @media (max-width: $mobile) {
+                font-size: 14px;
+                margin: 0px 0px 20px 0px;
+            }
+        }
+    }
+    // .products__button
+    &__button {
+        width: 170px;
+        padding: 10px 22px;
+        margin: 0px 0px 0px -35px;
+        @media (max-width: $pc) {
+            margin: 0px 0px 0px 0px;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+    }
+    // .products__image
+    &__image {
+        margin: 4px 0px 0px 0px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        width: calc(100% - 5px);
+        @media (max-width: $pc) {
+            width: 100%;
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+    // .products__title
+    &__title {
+        border-left: 12px solid $red;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        min-width: 238px;
+        font-size: 14px;
+        text-transform: uppercase;
+        text-align: center;
+        color: $white;
+        font-weight: 700;
+        background-color: rgb(0, 0, 0, 0.67);
+        padding: 13px 13px 13px 5px;
+        z-index: 5;
+        @media (max-width: $mobileSmall) {
+            min-width: 70%;
+            padding: 10px;
+            font-size: 12px;
+        }
+    }
+}
+
+//========================================================================================================================================================
+
+.calculator {
+    background-color: #e1e1e1;
+    padding: 15px 0px;
+    // .calculator__container
+    &__container {
+    }
+    // .calculator__content
+    &__content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        @media (max-width: $mobile) {
+            flex-direction: column;
+            justify-content: center;
+        }
+        p {
+            flex: 0 1 480px;
+            font-size: 14px;
+            line-height: 24px;
+            color: #252525;
+            font-weight: 300;
+            margin: 0px 20px 0px 0px;
+            @media (max-width: $mobile) {
+                text-align: center;
+                flex: 1 1 auto;
+                font-size: 12px;
+                margin: 0px 0px 15px 0px;
+            }
+        }
+    }
+    // .calculator__title
+    &__title {
+        margin: 0px 40px 0px 0px;
+        font-size: 18px;
+        line-height: 57px;
+        color: #3b3b3b;
+        font-weight: 900;
+        @media (max-width: $mobile) {
+            text-align: center;
+            font-size: 16px;
+            margin: 0px 0px 15px 0px;
+        }
+    }
+    // .calculator__button
+    &__button {
+        font-weight: 400;
+        flex: 0 0 200px;
+        background-color: $red;
+        color: $white;
+        &:hover {
+            background-color: transparent;
+            color: $mainColor;
+        }
+        @media (max-width: $mobile) {
+            flex: 1 1 auto;
+            width: 200px;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+    }
+}
+
+//========================================================================================================================================================
+
+.partners {
+    padding: 32px 0px 90px 0px;
+    border-bottom: 1px solid rgba(104, 104, 104, 0.23);
+    @media (max-width: $mobile) {
+        padding: 40px 0px;
+    }
+    // .partners__container
+    &__container {
+    }
+    // .partners__content
+    &__content {
+        h2 {
+            margin: 0px 0px 42px 0px;
+            @media (max-width: $mobile) {
+                margin: 0px 0px 30px 0px;
+            }
+        }
+    }
+    // .partners__body
+    &__body {
+    }
+    // .partners__column
+    &__column {
+        margin: 0px 0px 15px 0px;
+        &:last-child {
+            margin: 0px 0px 0px 0px;
+        }
+        @media (max-width: $mobile) {
+            margin: 0px 0px 5px 0px;
+        }
+    }
+    // .partners__image
+    &__image {
+        height: 115px;
+        background-color: $white;
+        border: 1px solid rgba(18, 19, 19, 0.36);
+        @media (max-width: $pc) {
+            height: 100%;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    }
+}
+
+//========================================================================================================================================================
+
+.images-product {
+    min-width: 0;
+    // .images-product__slider
+    &__slider {
+        position: relative;
+        min-width: 0;
+    }
+    // .images-product__wrapper
+    &__wrapper {
+    }
+    // .images-product__slide
+    &__slide {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        picture {
+            width: 100%;
+            object-fit: cover;
+            height: 667px;
+            min-height: 200px;
+            @media (max-width: $pc) {
+                height: 100%;
+            }
+        }
+        img {
+            width: 100%;
+            object-fit: cover;
+            height: 667px;
+            min-height: 200px;
+            @media (max-width: $pc) {
+                height: 100%;
+            }
+        }
+    }
+    // .images-product__container-arrows
+    &__container-arrows {
+        max-width: 1150px;
+        padding: 0px 15px;
+        margin: 0 auto;
+    }
+    // .images-product__arrow-prev
+    &__arrow-prev {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: 54px;
+        height: 54px;
+        right: 20px;
+        background: $red;
+        border-radius: 50%;
+        border: 1px solid transparent;
+        display: flex;
+        transform: translateY(-50%);
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease 0s;
+        @media (max-width: $tablet) {
+            width: 45px;
+            height: 45px;
+        }
+        @media (max-width: $mobile) {
+            width: 35px;
+            height: 35px;
+        }
+        .triangle-arrow-prev {
+            position: relative;
+            width: 0;
+            height: 0;
+            margin: 0px 0px 0px -4px;
+            border-top: 9px solid transparent;
+            border-bottom: 9px solid transparent;
+            border-right: 12px solid $white;
+            @media (max-width: $mobile) {
+                border-top: 5px solid transparent;
+                border-bottom: 5px solid transparent;
+                border-right: 8px solid $white;
+                margin: 0px 0px 0px -2px;
+            }
+        }
+        &:hover {
+            background-color: $mainColor;
+        }
+    }
+    // .images-product__arrow-next
+    &__arrow-next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: 54px;
+        height: 54px;
+        right: 20px;
+        background: $red;
+        border-radius: 50%;
+        transform: translateY(-50%);
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease 0s;
+        @media (max-width: $tablet) {
+            width: 45px;
+            height: 45px;
+        }
+        @media (max-width: $mobile) {
+            width: 35px;
+            height: 35px;
+        }
+        .triangle-arrow-next {
+            width: 0;
+            height: 0;
+            margin: 0px -4px 0px 0px;
+            border-top: 9px solid transparent;
+            border-bottom: 9px solid transparent;
+            border-left: 12px solid $white;
+            @media (max-width: $mobile) {
+                border-top: 5px solid transparent;
+                border-bottom: 5px solid transparent;
+                border-left: 8px solid $white;
+                margin: 0px -2px 0px 0px;
+            }
+        }
+        &:hover {
+            background-color: $mainColor;
+        }
+    }
+    // .images-product__thumbs
+    &__thumbs {
+    }
+    // .images-product__thumb
+    &__thumb {
+        height: 170px;
+        @media (max-width: 1920px) {
+            height: 100%;
+        }
+    }
+    // .images-product__desc
+    &__desc {
+        position: relative;
+        background-color: #c1c1c1;
+        padding: 40px 0px 35px 0px;
+        @media (max-width: $mobile) {
+            padding: 20px 0px;
+        }
+    }
+    // .images-product__container
+    &__container {
+        max-width: 915px;
+    }
+    // .images-product__titles
+    &__titles {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 23px;
+        @media (max-width: $pc) {
+            justify-content: center;
+        }
+        @media (max-width: $mobileSmall) {
+            flex-direction: column;
+        }
+    }
+    // .images-product__title
+    &__title {
+        font-size: 16px;
+        text-align: center;
+        text-transform: uppercase;
+        color: #464646;
+        font-weight: 300;
+        &:nth-child(3) {
+            margin: 0px 32px 0px 0px;
+        }
+        span {
+            font-weight: 700;
+            margin: 0px 0px 0px 9px;
+        }
+        @media (max-width: $mobile) {
+            font-size: 14px;
+        }
+        @media (max-width: $mobileSmall) {
+            font-size: 12px;
+        }
+    }
+}
+.triangle {
+    position: absolute;
+    top: -30px;
+    left: 49.4%;
+    width: 0;
+    height: 0;
+    border-left: 17.5px solid transparent;
+    border-right: 17.5px solid transparent;
+    border-top: 18px solid $red;
+    @media (max-width: $mobile) {
+        border-left: 13.5px solid transparent;
+        border-right: 13.5px solid transparent;
+        border-top: 14px solid $red;
+        top: -20px;
+    }
+}
+.thumb {
+    // .thumb__wrapper
+    &__wrapper {
+    }
+    // .thumb__slide
+    &__slide {
+        position: relative;
+        background-color: rgba(63, 63, 63, 0.941);
+
+        &:first-child {
+            .thumb__image {
+                border-top: none;
+                border-left: none;
+            }
+        }
+        &:last-child {
+            .thumb__image {
+                border-top: none;
+                border-right: none;
+            }
+        }
+        &.swiper-slide-thumb-active {
+            .thumb__image {
+                border: 7px solid $red;
+                border-radius: 6px;
+                &::before {
+                    content: "";
+                    display: none;
+                }
+            }
+        }
+        // Стили для предыдущего и следующего слайдов
+        &.swiper-slide-thumb-active + .swiper-slide {
+            .thumb__image {
+                border-left: 0px solid #3f3f3f;
+            }
+        }
+    }
+    // .thumb__image
+    &__image {
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        border-top: 7px solid rgba(63, 63, 63, 0.941);
+        border-bottom: 7px solid rgba(63, 63, 63, 0.941);
+        border-left: 3.5px solid rgba(63, 63, 63, 0.941);
+        border-right: 3.5px solid rgba(63, 63, 63, 0.941);
+        height: 100%;
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 15;
+            background: url("../img/bg-3.webp") 0 0 no-repeat;
+        }
+        img {
+            position: relative;
+            z-index: 5;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+}
+
+//========================================================================================================================================================
+
+.forms {
+    position: relative;
+    padding: 55px 0px 40px 0px;
+    border-bottom: 1px solid rgba(104, 104, 104, 0.23);
+    @media (max-width: $mobile) {
+        padding: 40px 0px;
+    }
+    // .forms__bg
+    &__bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    // .forms__container
+    &__container {
+    }
+    // .forms__content
+    &__content {
+        position: relative;
+        z-index: 10;
+        max-width: 929px;
+    }
+    // .forms__titles
+    &__titles {
+        display: flex;
+        justify-content: space-between;
+        margin: 0px 0px 50px 0px;
+        @media (max-width: $mobile) {
+            flex-direction: column;
+            justify-content: start;
+            margin: 0px 0px 20px 0px;
+        }
+        h2 {
+            text-align: left;
+            flex: 0 1 424px;
+            font-size: 29px;
+            line-height: 44px;
+            text-transform: uppercase;
+            color: #000000;
+            font-weight: 250;
+            margin: 0px 30px 0px 0px;
+            @media (max-width: $mobile) {
+                flex: 1 1 auto;
+                font-size: 24px;
+                margin: 0px 0px 20px 0px;
+            }
+            @media (max-width: $mobileSmall) {
+                font-size: 18px;
+            }
+        }
+        p {
+            flex: 0 1 435px;
+            font-size: 16px;
+            line-height: 24px;
+            color: #333333;
+            font-weight: 300;
+            padding: 8px 0px 0px 5px;
+            @media (max-width: $pc) {
+                padding: 0px 0px 0px 0px;
+            }
+            @media (max-width: $mobile) {
+                font-size: 14px;
+                flex: 1 1 auto;
+            }
+        }
+    }
+    // .forms__form
+    &__form {
+    }
+}
+
+.form {
+    display: flex;
+    justify-content: space-between;
+    @media (max-width: $mobile) {
+        flex-direction: column;
+        justify-content: start;
+    }
+    // .form__column
+    &__column {
+        flex: 0 1 425px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0px 30px 0px 0px;
+        @media (max-width: $mobile) {
+            flex: 1 1 auto;
+            align-items: start;
+            margin: 0px 0px 15px 0px;
+        }
+        &:last-child {
+            margin: 0px 0px 0px 0px;
+        }
+        p {
+            font-size: 11px;
+            line-height: 14px;
+            color: #5d5d5d;
+            font-weight: 300;
+            text-align: center;
+            margin: 15px 0px 0px 0px;
+            max-width: 315px;
+            a {
+                color: #0576c5;
+                text-decoration: underline;
+                transition: color 0.3s ease 0s;
+                &:hover {
+                    color: $red;
+                }
+            }
+        }
+    }
+    // .form__input
+    &__input {
+        width: 100%;
+        margin: 0px 0px 15px 0px;
+        &:last-child {
+            margin: 0px 0px 0px 0px;
+        }
+        input {
+            height: 44px;
+            border: 1px solid rgba(17, 18, 18, 0.26);
+            padding: 15px 20px;
+            width: 100%;
+            background-color: $white;
+            font-weight: 100;
+            font-size: 13px;
+            color: $mainColor;
+            &::placeholder {
+                color: #535353;
+            }
+            &._form-error {
+                border: 1px solid $red;
+            }
+        }
+        textarea {
+            height: 113px;
+            resize: none;
+            padding: 10px 20px;
+            width: 100%;
+            background-color: $white;
+            font-weight: 100;
+            font-size: 13px;
+            color: #525252;
+            border: 1px solid rgba(130, 140, 153, 0.67);
+            &::placeholder {
+                color: #525252;
+            }
+        }
+    }
+    // .form__bottom
+    &__bottom {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    // .form__file
+    &__file {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        cursor: pointer;
+        margin: 4px 0px 0px 0px;
+        &:hover {
+            span {
+                color: $red;
+            }
+        }
+        input {
+            cursor: pointer;
+            opacity: 0;
+            width: 100%;
+            position: absolute;
+        }
+        span {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            text-decoration: underline;
+            text-transform: uppercase;
+            color: #000000;
+            font-weight: 700;
+            transition: color 0.3s ease 0s;
+        }
+    }
+    // .form__previews
+    &__previews {
+        display: flex;
+        flex-wrap: wrap;
+        margin: -4px;
+        padding: 20px 0px 0px 0px;
+        @media (max-width: $mobile) {
+            padding: 15px 0px 0px 0px;
+        }
+    }
+    // .form__preview
+    &__preview {
+        font-size: 12px;
+        font-weight: 500;
+        position: relative;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
+    }
+    // .form__preview-close
+    &__preview-close {
+        cursor: pointer;
+        margin: 0px 0px 0px 5px;
+        &::before {
+            content: "+";
+            display: block;
+            font-size: 16px;
+            transform: rotate(-45deg);
+            color: $mainColor;
+            transition: all 0.3s ease 0s;
+        }
+        &:hover {
+            &::before {
+                color: $red;
+            }
+        }
+    }
+    // .form__button
+    &__button {
+        margin: 15px 0px 0px 0px;
+        width: 170px;
+        background-color: $red;
+        color: $white;
+        &:hover {
+            background-color: transparent;
+            color: $mainColor;
+        }
+        @media (max-width: $mobileSmall) {
+            width: 100%;
+        }
+    }
+}
