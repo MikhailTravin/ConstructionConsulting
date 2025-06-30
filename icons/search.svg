@@ -1,0 +1,9 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 28" width="29" height="28">
+	<title>Shape 50</title>
+	<defs>
+		<image  width="23" height="24" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAYCAMAAAAmopZHAAAAAXNSR0IB2cksfwAAANtQTFRFAAAA////////q7O5////////9/j47O7vq7O5TFxqGS5A////////5+nrl6Gp9/j49/j4h5Kb5+nr////////k52l9/j4M0ZWk52l////vsTJ////oKmw////o6uz////1trd////XGt3u8LH////u8LH////n6iw////zNDUbHmF////zNDU7/Dy0dXZqLC3/////////////////ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycA/ycAeJbIKwAAAEl0Uk5TAAgjOjoDNl5hYWE2ClBhUExhTAIuYVphWhthKGEnYRFhUWFRHWE3YTNhYRZHYWFhRwcTJR5FEuH5SI3/9pA/mfM5n/A2A6JjPDLUaTIAAADpSURBVHicbdDNawIxEAXw97ouFbRgi4hFRIUihZ4KpYdCKQj+z96EXjzswZMgomARUYqK0HrY+jHdELOJkAeB5EcyM4RQYRKcRJCGyQoVU0Qyf3vH8+RBHzI8/qYe5hibW9fk2niRO1s2J6uzh7f8sX7DtW7Be27hpCAL7RVuXL+TufaL8rYBq1y5XpSZ9hq/XS/J13nOBpeWy5yY+R84t16RsXE0OTNclRFSxyM5Vfu6yBCO40n/Z7Af4MKBZ+V9tXth5Hia1+Rlz+N4I+PI43g/8erT4/g4hOx6HK04S5+3ucv7HO2g8w8Oy0Ck4+nzMgAAAABJRU5ErkJggg=="/>
+	</defs>
+	<style>
+	</style>
+	<use id="Shape 50" href="#img1" x="3" y="2"/>
+</svg>
