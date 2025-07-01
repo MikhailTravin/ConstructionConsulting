@@ -553,9 +553,13 @@ h2 {
 }
 
 .header__top {
-  -webkit-transition: background-color 0.3s;
-  -o-transition: background-color 0.3s;
-  transition: background-color 0.3s;
+  height: auto;
+  max-height: 109px;
+  opacity: 1;
+  overflow: hidden;
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
   padding: 12px 0px 15px 0px;
   border-bottom: 1px solid rgba(214, 214, 214, 0.2);
 }
@@ -1102,6 +1106,7 @@ h2 {
 
 .left-footer__logo img.logo2 {
   height: 21px;
+  margin: 0px -4px 0px 0px;
 }
 
 .left-footer__copy {
@@ -4708,7 +4713,10 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
 
 @media (min-width: 991.98px) {
   .header._header-scroll .header__top {
-    display: none;
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+    pointer-events: none;
   }
 
   .top-header__column span {
