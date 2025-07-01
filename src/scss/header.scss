@@ -9,7 +9,10 @@
 	&._header-scroll {
 		.header__top {
 			@media (min-width: $tablet) {
-				display: none;
+				max-height: 0;
+				opacity: 0;
+				padding: 0;
+				pointer-events: none;
 			}
 			@media (max-width: $tablet) {
 				background-color: rgb(4, 20, 34, 0.8);
@@ -21,7 +24,11 @@
 	}
 	// .header__top
 	&__top {
-		transition: background-color 0.3s;
+		height: auto;
+		max-height: 109px;
+		opacity: 1;
+		overflow: hidden;
+		transition: all 0.3s ease-in-out;
 		padding: 12px 0px 15px 0px;
 		border-bottom: 1px solid rgb(214, 214, 214, 0.2);
 		@media (max-width: $mobile) {
