@@ -1,10 +1,182 @@
-<!-- <div id="popup" aria-hidden="true" class="popup">
+<div id="registration" aria-hidden="true" class="popup">
 	<div class="popup__wrapper">
 		<div class="popup__content">
-			<button data-close type="button" class="popup__close">Закрыть</button>
-			<div class="popup__text">
-				Text
+			<button data-close type="button" class="popup__close">
+				<img loading="lazy" src="../img/icons/close.svg" alt="">
+			</button>
+			<div class="popup__form form-popup">
+				<div class="form-popup__title">Создание учетной записи</div>
+				<form action="#" class="registration">
+					<div class="form-popup__top">
+						<div class="form-popup__inputs">
+							<label for="tel2">Введите номер телефона</label>
+							<div class="form-popup__input input-phone">
+								<input data-required id="tel2" autocomplete="off" type="text" name="form[]"
+									placeholder="" class="phone">
+								<div class="form-popup__placeholder"><span>+7</span>999 99 99</div>
+							</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input autocomplete="off" type="text" name="form[]" placeholder="Ваше имя">
+							</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input autocomplete="off" type="text" name="form[]" placeholder="Название компании">
+							</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input data-required="email" autocomplete="off" type="text" name="form[]"
+									placeholder="Адрес электронной почты">
+							</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input data-required autocomplete="off" type="password" name="form[]"
+									placeholder="Пароль">
+								<div class="form-popup__viewpass">
+									<img class="eye1" loading="lazy" src="../img/icons/eye1.svg" alt="">
+									<img class="eye2" loading="lazy" src="../img/icons/eye2.svg" alt="">
+								</div>
+							</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input data-required autocomplete="off" type="password" name="form[]"
+									placeholder="Введите повторно пароль">
+								<div class="form-popup__viewpass">
+									<img class="eye1" loading="lazy" src="../img/icons/eye1.svg" alt="">
+									<img class="eye2" loading="lazy" src="../img/icons/eye2.svg" alt="">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="g-recaptcha" data-sitekey="ВАШ_SITE_KEY"></div>
+					<div class="form-popup__buttons">
+						<button type="submit" class="form-popup__button button">Зарегистрировать</button>
+					</div>
+					<p>
+						Нажимая кнопку, вы соглашаетесь с <a href="#">политикой конфиденциальности</a>
+					</p>
+				</form>
 			</div>
 		</div>
 	</div>
-</div> -->
+</div>
+<div id="entry" aria-hidden="true" class="popup">
+	<div class="popup__wrapper">
+		<div class="popup__content">
+			<button data-close type="button" class="popup__close">
+				<img loading="lazy" src="../img/icons/close.svg" alt="">
+			</button>
+			<div class="popup__form form-popup">
+				<div class="form-popup__title">Войти в личный кабинет</div>
+				<form action="#">
+					<div class="form-popup__top">
+						<div class="form-popup__inputs">
+							<label for="tel1">Ваш номер телефона</label>
+							<div class="form-popup__input input-phone">
+								<input data-required id="tel1" autocomplete="off" type="text" name="form[]"
+									placeholder="" class="phone">
+								<div class="form-popup__placeholder"><span>+7</span>999 99 99</div>
+							</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input data-required autocomplete="off" type="password" name="form[]"
+									placeholder="Пароль">
+								<div class="form-popup__viewpass">
+									<img class="eye1" loading="lazy" src="../img/icons/eye1.svg" alt="">
+									<img class="eye2" loading="lazy" src="../img/icons/eye2.svg" alt="">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="checkbox">
+						<input id="c_1" class="checkbox__input" type="checkbox" value="1" name="form[]">
+						<label for="c_1" class="checkbox__label">
+							<span class="checkbox__text">Запомнить меня</span>
+						</label>
+					</div>
+					<div class="g-recaptcha" data-sitekey="ВАШ_SITE_KEY"></div>
+					<div class="form-popup__buttons">
+						<button type="submit" class="form-popup__button button">Войти</button>
+						<div class="form-popup__text"><span>или</span></div>
+						<a href="#" data-popup="#registration" class="form-popup__button button">Зарегистрироваться</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="edit-form" aria-hidden="true" class="popup edit-form">
+	<div class="popup__wrapper">
+		<div class="popup__content">
+			<button data-close type="button" class="popup__close">
+				<img loading="lazy" src="../img/icons/close.svg" alt="">
+			</button>
+			<div class="popup__form form-popup">
+				<div class="form-popup__title">Обновить профиль учетной записи</div>
+				<form action="#" class="registration">
+					<div class="form-popup__top">
+						<div class="form-popup__inputs">
+							<label for="tel2">Введите номер телефона</label>
+							<div class="form-popup__input input-phone">
+								<input data-required id="tel2" autocomplete="off" type="text" name="form[]"
+									value="99999999" class="phone">
+							</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input autocomplete="off" type="text" name="form[]" value="Сергей">
+							</div>
+							<div class="form-popup__placeholder-bottom">Ваше имя</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input data-required autocomplete="off" type="text" name="form[]"
+									value="ООО «МосПроектКомплекс»">
+							</div>
+							<div class="form-popup__placeholder-bottom">Название компании</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input data-required="email" autocomplete="off" type="text" name="form[]"
+									value="sergey@mosproektkompleks.ru">
+							</div>
+							<div class="form-popup__placeholder-bottom">Адрес электронной почты</div>
+						</div>
+					</div>
+					<div class="form-popup__passwords">
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input data-required autocomplete="off" type="password" name="form[]" value="1233455"
+									class="password">
+								<div class="form-popup__viewpass">
+									<img class="eye1" loading="lazy" src="../img/icons/eye1.svg" alt="">
+									<img class="eye2" loading="lazy" src="../img/icons/eye2.svg" alt="">
+								</div>
+							</div>
+						</div>
+						<div class="form-popup__inputs">
+							<div class="form-popup__input">
+								<input data-required autocomplete="off" type="password" name="form[]"
+									placeholder="Введите повторно пароль">
+								<div class="form-popup__viewpass">
+									<img class="eye1" loading="lazy" src="../img/icons/eye1.svg" alt="">
+									<img class="eye2" loading="lazy" src="../img/icons/eye2.svg" alt="">
+								</div>
+							</div>
+							<a href="#" class="form-popup__placeholder-bottom">Изменить пароль</a>
+						</div>
+					</div>
+					<div class="form-popup__buttons">
+						<button type="submit" class="form-popup__button button">Сохранить изменения</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

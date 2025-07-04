@@ -171,3 +171,25 @@ if (inputContainer) {
 };
 
 //========================================================================================================================================================
+
+
+const inputs = document.querySelectorAll('input[type="text"]');
+
+function handleInput() {
+    const parent = this.parentElement;
+    const hasValue = this.value.trim() !== '';
+
+    // Добавляем/удаляем класс filled к инпуту
+    this.classList.toggle('filled', hasValue);
+
+    // Добавляем/удаляем класс filled к родителю
+    if (parent) {
+        parent.classList.toggle('filled', hasValue);
+    }
+}
+
+inputs.forEach(input => {
+    input.addEventListener('input', handleInput);
+    // Проверка при загрузке страницы
+    handleInput.call(input);
+});

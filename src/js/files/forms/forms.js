@@ -8,7 +8,7 @@ import { gotoBlock } from "../scroll/gotoblock.js";
 //================================================================================================================================================================================================================================================================================================================================
 
 // Робота із полями форми.
-export function formFieldsInit(options = { viewPass: false, autoHeight: false }) {
+export function formFieldsInit(options = { viewPass: true, autoHeight: false }) {
 	document.body.addEventListener("focusin", function (e) {
 		const targetElement = e.target;
 		if ((targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA')) {
@@ -35,10 +35,14 @@ export function formFieldsInit(options = { viewPass: false, autoHeight: false })
 	if (options.viewPass) {
 		document.addEventListener("click", function (e) {
 			let targetElement = e.target;
-			if (targetElement.closest('[class*="__viewpass"]')) {
-				let inputType = targetElement.classList.contains('_viewpass-active') ? "password" : "text";
-				targetElement.parentElement.querySelector('input').setAttribute("type", inputType);
-				targetElement.classList.toggle('_viewpass-active');
+			const viewpassEl = targetElement.closest('.form-popup__viewpass');
+			if (viewpassEl) {
+				const input = viewpassEl.previousElementSibling; // Получаем предыдущий элемент — input
+				if (input && input.tagName === 'INPUT') {
+					const inputType = viewpassEl.classList.contains('_viewpass-active') ? "password" : "text";
+					input.setAttribute("type", inputType);
+					viewpassEl.classList.toggle('_viewpass-active');
+				}
 			}
 		});
 	}

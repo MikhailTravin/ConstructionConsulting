@@ -88,7 +88,7 @@ flsFunctions.tabs();
 Модуль "Попап"
 Сніппет (HTML): pl, pop
 */
-// import './libs/popup.js'
+import './libs/popup.js'
 
 /*
 Модуль параллакса мышью
@@ -102,7 +102,7 @@ import * as flsForms from "./files/forms/forms.js";
 
 /* Работа с полями формы */
 flsForms.formFieldsInit({
-viewPass: false,
+viewPass: true,
 autoHeight: false
 });
 /* Отправка формы */
