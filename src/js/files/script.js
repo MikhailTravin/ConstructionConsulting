@@ -84,73 +84,107 @@ document.addEventListener('DOMContentLoaded', () => {
 //========================================================================================================================================================
 
 //Прикрепить фото
-
+// Обработчик для файлового ввода
 let input = document.querySelector('input[type="file"]');
+let fileList = []; // Храним File объекты
 
 if (input) {
-    // Блок предпросмотра
     const preview = document.querySelector('.form__previews');
-    // Список файлов
-    const fileList = [];
 
-    // Вешаем функцию onChange на событие change у <input>
     input.addEventListener('change', onChange);
 
     function onChange() {
-        // Получаем первый выбранный файл
-        const file = input.files[0];
+        // Добавляем новые файлы
+        for (let i = 0; i < input.files.length; i++) {
+            if (!fileList.some(f => f.name === input.files[i].name && f.size === input.files[i].size)) {
+                fileList.push(input.files[i]);
+            }
+        }
+        updatePreview();
+        updateFileInput();
+    }
 
-        if (file) {
-            // Элемент списка .preview
+    function updatePreview() {
+        preview.innerHTML = '';
+        fileList.forEach((file, index) => {
             const item = document.createElement('div');
             item.classList.add('form__preview');
 
-            // Текстовое название файла
             const fileName = document.createElement('span');
-            fileName.textContent = file.name; // Добавляем название файла
-            fileName.classList.add('file-name'); // Добавляем класс для стилизации
+            fileName.textContent = file.name;
+            fileName.classList.add('file-name');
 
-            // Ссылка на исключение файла из списка выгрузки
             const remove = document.createElement('div');
             remove.classList.add('form__preview-close');
 
-            // Элемент массива fileList
+            remove.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileList.splice(index, 1);
+                updateFileInput();
+                updatePreview();
+            });
+
+            item.appendChild(remove);
+            item.appendChild(fileName);
+            preview.appendChild(item);
+        });
+    }
+
+    function updateFileInput() {
+        const dataTransfer = new DataTransfer();
+        fileList.forEach(file => dataTransfer.items.add(file));
+        input.files = dataTransfer.files;
+    }
+}
+/*
+let input = document.querySelector('input[type="file"]');
+
+if (input) {
+    const preview = document.querySelector('.form__previews');
+    const fileList = [];
+
+    input.addEventListener('change', onChange);
+
+    function onChange() {
+        const files = input.files;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            const item = document.createElement('div');
+            item.classList.add('form__preview');
+
+            const fileName = document.createElement('span');
+            fileName.textContent = file.name;
+            fileName.classList.add('file-name');
+
+            const remove = document.createElement('div');
+            remove.classList.add('form__preview-close');
+
             const fileItem = {
                 name: file.name,
                 modified: file.lastModified,
                 size: file.size,
             };
 
-            // Добавляем элемент в список выгрузки
             fileList.push(fileItem);
 
-            // Обработчик клика по ссылке исключения файла
             remove.addEventListener('click', () => {
-                // Исключаем элемент с файлом из списка выгрузки
                 fileList.splice(fileList.indexOf(fileItem), 1);
-                // Удаляем элемент списка (<div>) из контейнера
                 item.classList.add('removing');
                 setTimeout(() => item.remove(), 100);
             });
 
-            // Добавляем элементы в DOM
-            item.appendChild(remove); // Кнопка удаления
-            item.appendChild(fileName); // Название файла
-            preview.appendChild(item); // Добавляем в блок предпросмотра
+            item.appendChild(remove);
+            item.appendChild(fileName);
+            preview.appendChild(item);
         }
 
-        // Сбрасываем значение <input>
-        input.value = '';
-        // Создаем клон <input>
-        const newInput = input.cloneNode(true);
-        // Заменяем <input> клоном
-        input.replaceWith(newInput);
-        // Теперь input будет указывать на клона
-        input = newInput;
-        // Повесим функцию onChange на событие change у нового <input>
-        input.addEventListener('change', onChange);
+        // Логируем выбранные файлы
+        console.log('Выбранные файлы:', files);
     }
 }
+*/
 
 //========================================================================================================================================================
 

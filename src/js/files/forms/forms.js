@@ -182,64 +182,99 @@ export function formSubmit() {
 			});
 		}
 	}
-	async function formSubmitAction(form, e) {
-		const error = !form.hasAttribute('data-no-validate') ? formValidate.getErrors(form) : 0;
-		if (error === 0) {
-			const ajax = form.hasAttribute('data-ajax');
-			if (ajax) { // Якщо режим ajax
-				e.preventDefault();
-				const formAction = form.getAttribute('action') ? form.getAttribute('action').trim() : '#';
-				const formMethod = form.getAttribute('method') ? form.getAttribute('method').trim() : 'GET';
-				const formData = new FormData(form);
 
-				form.classList.add('_sending');
-				const response = await fetch(formAction, {
-					method: formMethod,
-					body: formData
-				});
-				if (response.ok) {
-					let responseResult = await response.json();
-					form.classList.remove('_sending');
-					formSent(form, responseResult);
-				} else {
-					alert("Помилка");
-					form.classList.remove('_sending');
-				}
-			} else if (form.hasAttribute('data-dev')) {	// Якщо режим розробки
-				e.preventDefault();
-				formSent(form);
-			}
-		} else {
-			e.preventDefault();
-			if (form.querySelector('._form-error') && form.hasAttribute('data-goto-error')) {
-				const formGoToErrorClass = form.dataset.gotoError ? form.dataset.gotoError : '._form-error';
-				gotoBlock(formGoToErrorClass, true, 1000);
+	async function formSubmitAction(form, e) {
+		e.preventDefault();
+		const formAction = form.getAttribute('action');
+		const formMethod = form.getAttribute('method') || 'POST';
+		const formData = new FormData(form);
+		const fileInput = form.querySelector('input[type="file"]');
+
+		// Добавляем файлы
+		if (fileInput?.files?.length > 0) {
+			for (let i = 0; i < fileInput.files.length; i++) {
+				formData.append('file', fileInput.files[i]);
 			}
 		}
+
+		form.classList.add('_sending');
+
+		try {
+			const response = await fetch(formAction, {
+				method: formMethod,
+				body: formData,
+				headers: {
+					'Accept': 'application/json'
+				}
+			});
+
+			const responseText = await response.text();
+			let result;
+
+			try {
+				result = JSON.parse(responseText);
+			} catch {
+				if (response.ok) {
+					result = { success: true, message: responseText };
+				} else {
+					throw new Error(responseText || 'Ошибка сервера');
+				}
+			}
+
+			if (!response.ok) {
+				throw new Error(result.message || 'Ошибка сервера');
+			}
+
+			form.classList.remove('_sending');
+			formSent(form, result);
+
+		} catch (error) {
+			form.classList.remove('_sending');
+			console.error('Ошибка отправки:', error);
+			alert('Ошибка: ' + (error.message || 'При отправке формы произошла ошибка'));
+		}
 	}
-	// Дії після надсилання форми
-	function formSent(form, responseResult = ``) {
-		// Створюємо подію відправлення форми
+
+	function formSent(form, responseResult = {}) {
+		// Очищаем файловое поле
+		const fileInput = form.querySelector('input[type="file"]');
+		if (fileInput) {
+			fileInput.value = ''; // Это очистит выбранные файлы
+		}
+
+		// Очищаем превью файлов
+		const previewContainer = form.querySelector('.form__previews');
+		if (previewContainer) {
+			previewContainer.innerHTML = '';
+		}
+
+		// Если есть глобальный массив fileList, очищаем его
+		if (typeof fileList !== 'undefined') {
+			fileList.length = 0;
+		}
+
+		// Создаем событие отправки формы
 		document.dispatchEvent(new CustomEvent("formSent", {
 			detail: {
 				form: form
 			}
 		}));
-		// Показуємо попап, якщо підключено модуль попапів 
-		// та для форми вказано налаштування
-		setTimeout(() => {
-			if (flsModules.popup) {
-				const popup = form.dataset.popupMessage;
-				popup ? flsModules.popup.open(popup) : null;
-			}
-		}, 0);
-		// Очищуємо форму
+
+		// Показываем попап, если подключен модуль попапов
+		if (flsModules.popup) {
+			const popup = form.dataset.popupMessage;
+			popup ? flsModules.popup.open(popup) : null;
+		}
+
+		// Очищаем форму
 		formValidate.formClean(form);
-		// Повідомляємо до консолі
-		formLogging(`Форму відправлено!`);
+
+		// Логируем в консоль
+		formLogging('Форма отправлена!');
 	}
+
 	function formLogging(message) {
-		FLS(`[Форми]: ${message}`);
+		FLS(`[Формы]: ${message}`);
 	}
 }
 /* Модуль форми "кількість" */
