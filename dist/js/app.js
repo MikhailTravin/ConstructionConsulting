@@ -3356,11 +3356,7 @@
                 }
             }));
         }
-        function functions_menuClose() {
-            bodyUnlock();
-            document.documentElement.classList.remove("menu-open");
-        }
-        function FLS(message) {
+        function functions_FLS(message) {
             setTimeout((() => {
                 if (window.FLS) console.log(message);
             }), 0);
@@ -3642,48 +3638,10 @@
                 if (!this.isOpen && this.lastFocusEl) this.lastFocusEl.focus(); else focusable[0].focus();
             }
             popupLogging(message) {
-                this.options.logging ? FLS(`[Попапос]: ${message}`) : null;
+                this.options.logging ? functions_FLS(`[Попапос]: ${message}`) : null;
             }
         }
         modules_flsModules.popup = new Popup({});
-        let gotoblock_gotoBlock = (targetBlock, noHeader = false, speed = 500, offsetTop = 0) => {
-            const targetBlockElement = document.querySelector(targetBlock);
-            if (targetBlockElement) {
-                let headerItem = "";
-                let headerItemHeight = 0;
-                if (noHeader) {
-                    headerItem = "header.header";
-                    const headerElement = document.querySelector(headerItem);
-                    if (!headerElement.classList.contains("_header-scroll")) {
-                        headerElement.style.cssText = `transition-duration: 0s;`;
-                        headerElement.classList.add("_header-scroll");
-                        headerItemHeight = headerElement.offsetHeight;
-                        headerElement.classList.remove("_header-scroll");
-                        setTimeout((() => {
-                            headerElement.style.cssText = ``;
-                        }), 0);
-                    } else headerItemHeight = headerElement.offsetHeight;
-                }
-                let options = {
-                    speedAsDuration: true,
-                    speed,
-                    header: headerItem,
-                    offset: offsetTop,
-                    easing: "easeOutQuad"
-                };
-                document.documentElement.classList.contains("menu-open") ? functions_menuClose() : null;
-                if ("undefined" !== typeof SmoothScroll) (new SmoothScroll).animateScroll(targetBlockElement, "", options); else {
-                    let targetBlockElementPosition = targetBlockElement.getBoundingClientRect().top + scrollY;
-                    targetBlockElementPosition = headerItemHeight ? targetBlockElementPosition - headerItemHeight : targetBlockElementPosition;
-                    targetBlockElementPosition = offsetTop ? targetBlockElementPosition - offsetTop : targetBlockElementPosition;
-                    window.scrollTo({
-                        top: targetBlockElementPosition,
-                        behavior: "smooth"
-                    });
-                }
-                FLS(`[gotoBlock]: Юхуу...їдемо до ${targetBlock}`);
-            } else FLS(`[gotoBlock]: Йой... Такого блоку немає на сторінці: ${targetBlock}`);
-        };
         function formFieldsInit(options = {
             viewPass: true,
             autoHeight: false
@@ -3837,56 +3795,60 @@
                 }));
             }
             async function formSubmitAction(form, e) {
-                const error = !form.hasAttribute("data-no-validate") ? formValidate.getErrors(form) : 0;
-                if (0 === error) {
-                    const ajax = form.hasAttribute("data-ajax");
-                    if (ajax) {
-                        e.preventDefault();
-                        const formAction = form.getAttribute("action") ? form.getAttribute("action").trim() : "#";
-                        const formMethod = form.getAttribute("method") ? form.getAttribute("method").trim() : "GET";
-                        const formData = new FormData(form);
-                        form.classList.add("_sending");
-                        const response = await fetch(formAction, {
-                            method: formMethod,
-                            body: formData
-                        });
-                        if (response.ok) {
-                            let responseResult = await response.json();
-                            form.classList.remove("_sending");
-                            formSent(form, responseResult);
-                        } else {
-                            alert("Помилка");
-                            form.classList.remove("_sending");
+                e.preventDefault();
+                const formAction = form.getAttribute("action");
+                const formMethod = form.getAttribute("method") || "POST";
+                const formData = new FormData(form);
+                const fileInput = form.querySelector('input[type="file"]');
+                if (fileInput?.files?.length > 0) for (let i = 0; i < fileInput.files.length; i++) formData.append("file", fileInput.files[i]);
+                form.classList.add("_sending");
+                try {
+                    const response = await fetch(formAction, {
+                        method: formMethod,
+                        body: formData,
+                        headers: {
+                            Accept: "application/json"
                         }
-                    } else if (form.hasAttribute("data-dev")) {
-                        e.preventDefault();
-                        formSent(form);
+                    });
+                    const responseText = await response.text();
+                    let result;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch {
+                        if (response.ok) result = {
+                            success: true,
+                            message: responseText
+                        }; else throw new Error(responseText || "Ошибка сервера");
                     }
-                } else {
-                    e.preventDefault();
-                    if (form.querySelector("._form-error") && form.hasAttribute("data-goto-error")) {
-                        const formGoToErrorClass = form.dataset.gotoError ? form.dataset.gotoError : "._form-error";
-                        gotoblock_gotoBlock(formGoToErrorClass, true, 1e3);
-                    }
+                    if (!response.ok) throw new Error(result.message || "Ошибка сервера");
+                    form.classList.remove("_sending");
+                    formSent(form, result);
+                } catch (error) {
+                    form.classList.remove("_sending");
+                    console.error("Ошибка отправки:", error);
+                    alert("Ошибка: " + (error.message || "При отправке формы произошла ошибка"));
                 }
             }
-            function formSent(form, responseResult = ``) {
+            function formSent(form, responseResult = {}) {
+                const fileInput = form.querySelector('input[type="file"]');
+                if (fileInput) fileInput.value = "";
+                const previewContainer = form.querySelector(".form__previews");
+                if (previewContainer) previewContainer.innerHTML = "";
+                if ("undefined" !== typeof fileList) fileList.length = 0;
                 document.dispatchEvent(new CustomEvent("formSent", {
                     detail: {
                         form
                     }
                 }));
-                setTimeout((() => {
-                    if (modules_flsModules.popup) {
-                        const popup = form.dataset.popupMessage;
-                        popup ? modules_flsModules.popup.open(popup) : null;
-                    }
-                }), 0);
+                if (modules_flsModules.popup) {
+                    const popup = form.dataset.popupMessage;
+                    popup ? modules_flsModules.popup.open(popup) : null;
+                }
                 formValidate.formClean(form);
-                formLogging(`Форму відправлено!`);
+                formLogging("Форма отправлена!");
             }
             function formLogging(message) {
-                FLS(`[Форми]: ${message}`);
+                functions_FLS(`[Формы]: ${message}`);
             }
         }
         __webpack_require__(125);
@@ -8815,13 +8777,18 @@ PERFORMANCE OF THIS SOFTWARE.
             indents();
         }));
         let input = document.querySelector('input[type="file"]');
+        let script_fileList = [];
         if (input) {
             const preview = document.querySelector(".form__previews");
-            const fileList = [];
             input.addEventListener("change", onChange);
             function onChange() {
-                const file = input.files[0];
-                if (file) {
+                for (let i = 0; i < input.files.length; i++) if (!script_fileList.some((f => f.name === input.files[i].name && f.size === input.files[i].size))) script_fileList.push(input.files[i]);
+                updatePreview();
+                updateFileInput();
+            }
+            function updatePreview() {
+                preview.innerHTML = "";
+                script_fileList.forEach(((file, index) => {
                     const item = document.createElement("div");
                     item.classList.add("form__preview");
                     const fileName = document.createElement("span");
@@ -8829,26 +8796,21 @@ PERFORMANCE OF THIS SOFTWARE.
                     fileName.classList.add("file-name");
                     const remove = document.createElement("div");
                     remove.classList.add("form__preview-close");
-                    const fileItem = {
-                        name: file.name,
-                        modified: file.lastModified,
-                        size: file.size
-                    };
-                    fileList.push(fileItem);
-                    remove.addEventListener("click", (() => {
-                        fileList.splice(fileList.indexOf(fileItem), 1);
-                        item.classList.add("removing");
-                        setTimeout((() => item.remove()), 100);
+                    remove.addEventListener("click", (e => {
+                        e.stopPropagation();
+                        script_fileList.splice(index, 1);
+                        updateFileInput();
+                        updatePreview();
                     }));
                     item.appendChild(remove);
                     item.appendChild(fileName);
                     preview.appendChild(item);
-                }
-                input.value = "";
-                const newInput = input.cloneNode(true);
-                input.replaceWith(newInput);
-                input = newInput;
-                input.addEventListener("change", onChange);
+                }));
+            }
+            function updateFileInput() {
+                const dataTransfer = new DataTransfer;
+                script_fileList.forEach((file => dataTransfer.items.add(file)));
+                input.files = dataTransfer.files;
             }
         }
         const inputContainer = document.querySelector(".bottom-header__input");
