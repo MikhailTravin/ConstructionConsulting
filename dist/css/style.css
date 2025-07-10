@@ -5428,6 +5428,10 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
     padding: 0px 0px 0px 0px;
   }
 
+  .header-white._header-scroll .header__top {
+    background-color: #ececec;
+  }
+
   .top-header__logo img.logo1 {
     height: 20px;
   }

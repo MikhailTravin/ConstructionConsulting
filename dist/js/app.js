@@ -3787,11 +3787,42 @@
             if (forms.length) for (const form of forms) {
                 form.addEventListener("submit", (function(e) {
                     const form = e.target;
+                    if (!formValidate(form)) {
+                        e.preventDefault();
+                        return;
+                    }
                     formSubmitAction(form, e);
                 }));
                 form.addEventListener("reset", (function(e) {
                     const form = e.target;
-                    formValidate.formClean(form);
+                    formClean(form);
+                }));
+            }
+            function formValidate(form) {
+                let error = 0;
+                const formRequiredItems = form.querySelectorAll("[data-required]");
+                if (formRequiredItems.length) formRequiredItems.forEach((item => {
+                    const input = item.querySelector("input, textarea");
+                    if (input) if ("" === input.value.trim()) {
+                        formAddError(input);
+                        error++;
+                    } else formRemoveError(input);
+                }));
+                return 0 === error;
+            }
+            function formAddError(input) {
+                input.classList.add("_error");
+                input.parentElement.classList.add("_error");
+            }
+            function formRemoveError(input) {
+                input.classList.remove("_error");
+                input.parentElement.classList.remove("_error");
+            }
+            function formClean(form) {
+                const inputs = form.querySelectorAll("input, textarea");
+                inputs.forEach((input => {
+                    input.value = "";
+                    formRemoveError(input);
                 }));
             }
             async function formSubmitAction(form, e) {
@@ -3844,7 +3875,7 @@
                     const popup = form.dataset.popupMessage;
                     popup ? modules_flsModules.popup.open(popup) : null;
                 }
-                formValidate.formClean(form);
+                formClean(form);
                 formLogging("Форма отправлена!");
             }
             function formLogging(message) {
