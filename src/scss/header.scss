@@ -47,6 +47,13 @@
 }
 
 .header-white {
+	&._header-scroll {
+		.header__top {
+			@media (max-width: $tablet) {
+				background-color: #ececec;
+			}
+		}
+	}
 	.header__top {
 		background-color: #ececec;
 		border-bottom: 1px solid #d6d6d6;
