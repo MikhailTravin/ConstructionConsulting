@@ -8,7 +8,9 @@ import { gotoBlock } from "../scroll/gotoblock.js";
 //================================================================================================================================================================================================================================================================================================================================
 
 // Робота із полями форми.
+// Инициализация полей формы
 export function formFieldsInit(options = { viewPass: true, autoHeight: false }) {
+	// Обработчик фокуса на полях ввода
 	document.body.addEventListener("focusin", function (e) {
 		const targetElement = e.target;
 		if ((targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA')) {
@@ -20,6 +22,8 @@ export function formFieldsInit(options = { viewPass: true, autoHeight: false }) 
 			targetElement.hasAttribute('data-validate') ? formValidate.removeError(targetElement) : null;
 		}
 	});
+
+	// Обработчик потери фокуса
 	document.body.addEventListener("focusout", function (e) {
 		const targetElement = e.target;
 		if ((targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA')) {
@@ -27,17 +31,18 @@ export function formFieldsInit(options = { viewPass: true, autoHeight: false }) 
 				targetElement.classList.remove('_form-focus');
 				targetElement.parentElement.classList.remove('_form-focus');
 			}
-			// Миттєва валідація
+			// Мгновенная валидация
 			targetElement.hasAttribute('data-validate') ? formValidate.validateInput(targetElement) : null;
 		}
 	});
-	// Якщо увімкнено, додаємо функціонал "Показати пароль"
+
+	// Функционал "Показать пароль"
 	if (options.viewPass) {
 		document.addEventListener("click", function (e) {
 			let targetElement = e.target;
 			const viewpassEl = targetElement.closest('.form-popup__viewpass');
 			if (viewpassEl) {
-				const input = viewpassEl.previousElementSibling; // Получаем предыдущий элемент — input
+				const input = viewpassEl.previousElementSibling;
 				if (input && input.tagName === 'INPUT') {
 					const inputType = viewpassEl.classList.contains('_viewpass-active') ? "password" : "text";
 					input.setAttribute("type", inputType);
@@ -46,7 +51,8 @@ export function formFieldsInit(options = { viewPass: true, autoHeight: false }) 
 			}
 		});
 	}
-	// Якщо увімкнено, додаємо функціонал "Автовисота"
+
+	// Автовысота для textarea
 	if (options.autoHeight) {
 		const textareas = document.querySelectorAll('textarea[data-autoheight]');
 		if (textareas.length) {
@@ -68,8 +74,32 @@ export function formFieldsInit(options = { viewPass: true, autoHeight: false }) 
 			}
 		}
 	}
+
+	// Проверка паролей в реальном времени
+	document.addEventListener("input", function (e) {
+		const target = e.target;
+		if (target.type === "password") {
+			const form = target.closest('form');
+			if (form) {
+				const passwordInputs = form.querySelectorAll('input[type="password"]');
+				if (passwordInputs.length >= 2) {
+					const [password1, password2] = passwordInputs;
+					if (target === password2 && password1.value && password2.value) {
+						if (password1.value !== password2.value) {
+							formValidate.addError(password2);
+							formValidate.removeSuccess(password2);
+						} else {
+							formValidate.removeError(password2);
+							formValidate.addSuccess(password2);
+						}
+					}
+				}
+			}
+		}
+	});
 }
-// Валідація форм
+
+// Валидация форм
 export let formValidate = {
 	getErrors(form) {
 		let error = 0;
@@ -80,11 +110,41 @@ export let formValidate = {
 					error += this.validateInput(formRequiredItem);
 				}
 			});
+
+			// Дополнительная проверка совпадения паролей
+			const passwordInputs = form.querySelectorAll('input[type="password"]');
+			if (passwordInputs.length >= 2) {
+				const [password1, password2] = passwordInputs;
+				if (password1.value && password2.value && password1.value !== password2.value) {
+					this.addError(password2);
+					this.removeSuccess(password2);
+					error++;
+				}
+			}
 		}
 		return error;
 	},
+
 	validateInput(formRequiredItem) {
 		let error = 0;
+
+		// Проверка на совпадение паролей для поля подтверждения пароля
+		if (formRequiredItem.type === "password" &&
+			(formRequiredItem.placeholder === "Введите повторно пароль" ||
+				formRequiredItem.nextElementSibling?.classList?.contains('form-popup__viewpass'))) {
+			const form = formRequiredItem.closest('form');
+			const passwordInputs = form.querySelectorAll('input[type="password"]');
+			if (passwordInputs.length >= 2) {
+				const [password1, password2] = passwordInputs;
+				if (password1.value !== password2.value) {
+					this.addError(formRequiredItem);
+					this.removeSuccess(formRequiredItem);
+					error++;
+					return error;
+				}
+			}
+		}
+
 		if (formRequiredItem.dataset.required === "email") {
 			formRequiredItem.value = formRequiredItem.value.replace(" ", "");
 			if (this.emailTest(formRequiredItem)) {
@@ -111,30 +171,77 @@ export let formValidate = {
 		}
 		return error;
 	},
+
 	addError(formRequiredItem) {
+		// Если ошибка уже есть, ничего не делаем
+		if (formRequiredItem.classList.contains('_form-error')) return;
+
 		formRequiredItem.classList.add('_form-error');
 		formRequiredItem.parentElement.classList.add('_form-error');
-		let inputError = formRequiredItem.parentElement.querySelector('.form__error');
-		if (inputError) formRequiredItem.parentElement.removeChild(inputError);
-		if (formRequiredItem.dataset.error) {
-			formRequiredItem.parentElement.insertAdjacentHTML('beforeend', `<div class="form__error">${formRequiredItem.dataset.error}</div>`);
+
+		// Находим контейнер .form__input
+		const inputContainer = formRequiredItem.closest('.form__input') || formRequiredItem.parentElement;
+
+		// Проверяем, есть ли уже сообщение об ошибке
+		const existingError = inputContainer.querySelector('.form__error');
+		if (existingError) return;
+
+		// Получаем сообщение об ошибке из data-error
+		let errorMessage = formRequiredItem.dataset.error;
+		if (!errorMessage && formRequiredItem.type === "password" &&
+			(formRequiredItem.placeholder === "Введите повторно пароль" ||
+				formRequiredItem.nextElementSibling?.classList?.contains('form-popup__viewpass'))) {
+			errorMessage = "Пароли не совпадают";
+		}
+
+		if (errorMessage) {
+			// Создаем контейнер для ошибки
+			const errorContainer = document.createElement('div');
+			errorContainer.className = 'form__error-container';
+
+			// Создаем элемент .form__error и устанавливаем текст из data-error
+			const errorElement = document.createElement('div');
+			errorElement.className = 'form__error';
+			errorElement.textContent = errorMessage;
+
+			errorContainer.appendChild(errorElement);
+
+			// Вставляем после основного контейнера
+			inputContainer.insertAdjacentElement('afterend', errorContainer);
+
+			// Сохраняем ссылку на контейнер ошибки
+			formRequiredItem._errorContainer = errorContainer;
 		}
 	},
+
 	removeError(formRequiredItem) {
 		formRequiredItem.classList.remove('_form-error');
 		formRequiredItem.parentElement.classList.remove('_form-error');
-		if (formRequiredItem.parentElement.querySelector('.form__error')) {
-			formRequiredItem.parentElement.removeChild(formRequiredItem.parentElement.querySelector('.form__error'));
+
+		// Удаляем контейнер с ошибкой, если он был создан
+		if (formRequiredItem._errorContainer) {
+			formRequiredItem._errorContainer.remove();
+			delete formRequiredItem._errorContainer;
+		}
+
+		// Дополнительная проверка на случай, если контейнер был создан другим способом
+		const inputContainer = formRequiredItem.closest('.form__input') || formRequiredItem.parentElement;
+		const nextElement = inputContainer.nextElementSibling;
+		if (nextElement && nextElement.classList.contains('form__error-container')) {
+			nextElement.remove();
 		}
 	},
+
 	addSuccess(formRequiredItem) {
 		formRequiredItem.classList.add('_form-success');
 		formRequiredItem.parentElement.classList.add('_form-success');
 	},
+
 	removeSuccess(formRequiredItem) {
 		formRequiredItem.classList.remove('_form-success');
 		formRequiredItem.parentElement.classList.remove('_form-success');
 	},
+
 	formClean(form) {
 		form.reset();
 		setTimeout(() => {
@@ -143,7 +250,7 @@ export let formValidate = {
 				const el = inputs[index];
 				el.parentElement.classList.remove('_form-focus');
 				el.classList.remove('_form-focus');
-				formValidate.removeError(el);
+				this.removeError(el);
 			}
 			let checkboxes = form.querySelectorAll('.checkbox__input');
 			if (checkboxes.length > 0) {
@@ -163,88 +270,55 @@ export let formValidate = {
 			}
 		}, 0);
 	},
+
 	emailTest(formRequiredItem) {
 		return !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,8})+$/.test(formRequiredItem.value);
 	}
 }
-/* Відправлення форм */
+
+// Отправка форм
 export function formSubmit() {
 	const forms = document.forms;
 	if (forms.length) {
 		for (const form of forms) {
 			form.addEventListener('submit', function (e) {
 				const form = e.target;
-				if (!formValidate(form)) {
+				if (formValidate.getErrors(form)) {
 					e.preventDefault();
 					return;
 				}
 				formSubmitAction(form, e);
 			});
+
 			form.addEventListener('reset', function (e) {
 				const form = e.target;
-				formClean(form);
+				formValidate.formClean(form);
+				clearFileInputs(form);
 			});
 		}
-	}
-
-	// Функция валидации формы
-	function formValidate(form) {
-		let error = 0;
-		const formRequiredItems = form.querySelectorAll('[data-required]');
-
-		if (formRequiredItems.length) {
-			formRequiredItems.forEach(item => {
-				const input = item.querySelector('input, textarea');
-				if (input) {
-					if (input.value.trim() === '') {
-						formAddError(input);
-						error++;
-					} else {
-						formRemoveError(input);
-					}
-				}
-			});
-		}
-
-		return error === 0;
-	}
-
-	// Добавление класса ошибки
-	function formAddError(input) {
-		input.classList.add('_error');
-		input.parentElement.classList.add('_error');
-	}
-
-	// Удаление класса ошибки
-	function formRemoveError(input) {
-		input.classList.remove('_error');
-		input.parentElement.classList.remove('_error');
-	}
-
-	// Очистка формы
-	function formClean(form) {
-		const inputs = form.querySelectorAll('input, textarea');
-		inputs.forEach(input => {
-			input.value = '';
-			formRemoveError(input);
-		});
 	}
 
 	async function formSubmitAction(form, e) {
 		e.preventDefault();
+
 		const formAction = form.getAttribute('action');
-		const formMethod = form.getAttribute('method') || 'POST';
+		if (!formAction || formAction.includes('.html')) {
+			showResultMessage('Ошибка: указан неверный адрес отправки формы', true, form);
+			return;
+		}
+
+		const formMethod = form.getAttribute('method')?.toUpperCase() || 'POST';
 		const formData = new FormData(form);
 		const fileInput = form.querySelector('input[type="file"]');
 
-		// Добавляем файлы
 		if (fileInput?.files?.length > 0) {
-			for (let i = 0; i < fileInput.files.length; i++) {
-				formData.append('file', fileInput.files[i]);
-			}
+			Array.from(fileInput.files).forEach(file => {
+				formData.append(fileInput.name || 'files[]', file);
+			});
 		}
 
 		form.classList.add('_sending');
+		showResultMessage('Отправка данных...', false, form);
 
 		try {
 			const response = await fetch(formAction, {
@@ -255,73 +329,111 @@ export function formSubmit() {
 				}
 			});
 
-			const responseText = await response.text();
-			let result;
+			const result = await parseResponse(response);
 
-			try {
-				result = JSON.parse(responseText);
-			} catch {
-				if (response.ok) {
-					result = { success: true, message: responseText };
-				} else {
-					throw new Error(responseText || 'Ошибка сервера');
-				}
-			}
-
-			if (!response.ok) {
+			if (!response.ok || result.success === false) {
 				throw new Error(result.message || 'Ошибка сервера');
 			}
 
 			form.classList.remove('_sending');
+			showResultMessage(result.message || 'Форма успешно отправлена', false, form);
+
+			// Очищаем форму
+			form.reset();
+			clearFileInputs(form);
+
+			// Очищаем превью файлов
+			const previewsContainer = form.querySelector('.form__previews');
+			if (previewsContainer) previewsContainer.innerHTML = '';
+
+			// Вызываем кастомное событие и показываем попап
 			formSent(form, result);
 
 		} catch (error) {
 			form.classList.remove('_sending');
 			console.error('Ошибка отправки:', error);
-			alert('Ошибка: ' + (error.message || 'При отправке формы произошла ошибка'));
+			showResultMessage(extractErrorMessage(error), true, form);
+		}
+	}
+
+	function clearFileInputs(form) {
+		const fileInputs = form.querySelectorAll('input[type="file"]');
+		fileInputs.forEach(input => {
+			input.value = '';
+		});
+
+		if (typeof fileList !== 'undefined') {
+			fileList.length = 0;
 		}
 	}
 
 	function formSent(form, responseResult = {}) {
-		// Очищаем файловое поле
-		const fileInput = form.querySelector('input[type="file"]');
-		if (fileInput) {
-			fileInput.value = '';
-		}
-
-		// Очищаем превью файлов
-		const previewContainer = form.querySelector('.form__previews');
-		if (previewContainer) {
-			previewContainer.innerHTML = '';
-		}
-
-		// Если есть глобальный массив fileList, очищаем его
-		if (typeof fileList !== 'undefined') {
-			fileList.length = 0;
-		}
-
-		// Создаем событие отправки формы
+		// Диспатчим кастомное событие
 		document.dispatchEvent(new CustomEvent("formSent", {
 			detail: {
-				form: form
+				form: form,
+				response: responseResult
 			}
 		}));
 
-		// Показываем попап, если подключен модуль попапов
-		if (flsModules.popup) {
-			const popup = form.dataset.popupMessage;
-			popup ? flsModules.popup.open(popup) : null;
+		// Показываем попап
+		const popupId = form.dataset.popupMessage;
+		if (popupId) {
+			// Проверяем разные варианты реализации попапов
+			if (typeof FLSModules !== 'undefined' && FLSModules.popup) {
+				FLSModules.popup.open(popupId);
+			}
+			else if (typeof flsModules !== 'undefined' && flsModules.popup) {
+				flsModules.popup.open(popupId);
+			}
+			else if (typeof MicroModal !== 'undefined') {
+				MicroModal.show(popupId.replace('#', ''));
+			}
+			else {
+				console.warn('Не найдена реализация попапов');
+			}
 		}
 
-		// Очищаем форму
-		formClean(form);
-
-		// Логируем в консоль
+		formValidate.formClean(form);
 		formLogging('Форма отправлена!');
 	}
 
+	function parseResponse(response) {
+		const contentType = response.headers.get('content-type');
+		if (contentType && contentType.includes('application/json')) {
+			return response.json();
+		}
+		return response.text();
+	}
+
+	function showResultMessage(message, isError, form) {
+		// Ищем элемент результата внутри формы
+		const resultElement = form.querySelector('.form-result');
+
+		if (resultElement) {
+			resultElement.textContent = message;
+			resultElement.style.display = 'block';
+			resultElement.classList.toggle('_error', isError);
+			resultElement.classList.toggle('_success', !isError);
+
+			// Скрываем сообщение через 5 секунд
+			if (!isError) {
+				setTimeout(() => {
+					resultElement.style.display = 'none';
+				}, 5000);
+			}
+		}
+	}
+
+	function extractErrorMessage(error) {
+		if (error instanceof Error) {
+			return error.message;
+		}
+		return String(error);
+	}
+
 	function formLogging(message) {
-		FLS(`[Формы]: ${message}`);
+		console.log(`[Формы]: ${message}`);
 	}
 }
 /* Модуль форми "кількість" */
