@@ -169,11 +169,6 @@ body::after {
 				opacity: 0;
 			}
 		}
-		&:hover {
-			.form-popup__placeholder {
-				opacity: 0;
-			}
-		}
 		input {
 			width: 100%;
 			font-size: 18px;
@@ -297,6 +292,11 @@ body::after {
 		width: calc(100% - 50px);
 		margin: 25px 50px 50px 0px;
 	}
+}
+
+.form__error {
+	color: #e50707;
+	font-size: 10px;
 }
 
 .g-recaptcha {
