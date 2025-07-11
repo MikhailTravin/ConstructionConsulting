@@ -3698,18 +3698,61 @@
                     }
                 }
             }
+            document.addEventListener("input", (function(e) {
+                const target = e.target;
+                if ("password" === target.type) {
+                    const form = target.closest("form");
+                    if (form) {
+                        const passwordInputs = form.querySelectorAll('input[type="password"]');
+                        if (passwordInputs.length >= 2) {
+                            const [password1, password2] = passwordInputs;
+                            if (target === password2 && password1.value && password2.value) if (password1.value !== password2.value) {
+                                formValidate.addError(password2);
+                                formValidate.removeSuccess(password2);
+                            } else {
+                                formValidate.removeError(password2);
+                                formValidate.addSuccess(password2);
+                            }
+                        }
+                    }
+                }
+            }));
         }
         let formValidate = {
             getErrors(form) {
                 let error = 0;
                 let formRequiredItems = form.querySelectorAll("*[data-required]");
-                if (formRequiredItems.length) formRequiredItems.forEach((formRequiredItem => {
-                    if ((null !== formRequiredItem.offsetParent || "SELECT" === formRequiredItem.tagName) && !formRequiredItem.disabled) error += this.validateInput(formRequiredItem);
-                }));
+                if (formRequiredItems.length) {
+                    formRequiredItems.forEach((formRequiredItem => {
+                        if ((null !== formRequiredItem.offsetParent || "SELECT" === formRequiredItem.tagName) && !formRequiredItem.disabled) error += this.validateInput(formRequiredItem);
+                    }));
+                    const passwordInputs = form.querySelectorAll('input[type="password"]');
+                    if (passwordInputs.length >= 2) {
+                        const [password1, password2] = passwordInputs;
+                        if (password1.value && password2.value && password1.value !== password2.value) {
+                            this.addError(password2);
+                            this.removeSuccess(password2);
+                            error++;
+                        }
+                    }
+                }
                 return error;
             },
             validateInput(formRequiredItem) {
                 let error = 0;
+                if ("password" === formRequiredItem.type && ("Введите повторно пароль" === formRequiredItem.placeholder || formRequiredItem.nextElementSibling?.classList?.contains("form-popup__viewpass"))) {
+                    const form = formRequiredItem.closest("form");
+                    const passwordInputs = form.querySelectorAll('input[type="password"]');
+                    if (passwordInputs.length >= 2) {
+                        const [password1, password2] = passwordInputs;
+                        if (password1.value !== password2.value) {
+                            this.addError(formRequiredItem);
+                            this.removeSuccess(formRequiredItem);
+                            error++;
+                            return error;
+                        }
+                    }
+                }
                 if ("email" === formRequiredItem.dataset.required) {
                     formRequiredItem.value = formRequiredItem.value.replace(" ", "");
                     if (this.emailTest(formRequiredItem)) {
@@ -3735,16 +3778,35 @@
                 return error;
             },
             addError(formRequiredItem) {
+                if (formRequiredItem.classList.contains("_form-error")) return;
                 formRequiredItem.classList.add("_form-error");
                 formRequiredItem.parentElement.classList.add("_form-error");
-                let inputError = formRequiredItem.parentElement.querySelector(".form__error");
-                if (inputError) formRequiredItem.parentElement.removeChild(inputError);
-                if (formRequiredItem.dataset.error) formRequiredItem.parentElement.insertAdjacentHTML("beforeend", `<div class="form__error">${formRequiredItem.dataset.error}</div>`);
+                const inputContainer = formRequiredItem.closest(".form__input") || formRequiredItem.parentElement;
+                const existingError = inputContainer.querySelector(".form__error");
+                if (existingError) return;
+                let errorMessage = formRequiredItem.dataset.error;
+                if (!errorMessage && "password" === formRequiredItem.type && ("Введите повторно пароль" === formRequiredItem.placeholder || formRequiredItem.nextElementSibling?.classList?.contains("form-popup__viewpass"))) errorMessage = "Пароли не совпадают";
+                if (errorMessage) {
+                    const errorContainer = document.createElement("div");
+                    errorContainer.className = "form__error-container";
+                    const errorElement = document.createElement("div");
+                    errorElement.className = "form__error";
+                    errorElement.textContent = errorMessage;
+                    errorContainer.appendChild(errorElement);
+                    inputContainer.insertAdjacentElement("afterend", errorContainer);
+                    formRequiredItem._errorContainer = errorContainer;
+                }
             },
             removeError(formRequiredItem) {
                 formRequiredItem.classList.remove("_form-error");
                 formRequiredItem.parentElement.classList.remove("_form-error");
-                if (formRequiredItem.parentElement.querySelector(".form__error")) formRequiredItem.parentElement.removeChild(formRequiredItem.parentElement.querySelector(".form__error"));
+                if (formRequiredItem._errorContainer) {
+                    formRequiredItem._errorContainer.remove();
+                    delete formRequiredItem._errorContainer;
+                }
+                const inputContainer = formRequiredItem.closest(".form__input") || formRequiredItem.parentElement;
+                const nextElement = inputContainer.nextElementSibling;
+                if (nextElement && nextElement.classList.contains("form__error-container")) nextElement.remove();
             },
             addSuccess(formRequiredItem) {
                 formRequiredItem.classList.add("_form-success");
@@ -3762,7 +3824,7 @@
                         const el = inputs[index];
                         el.parentElement.classList.remove("_form-focus");
                         el.classList.remove("_form-focus");
-                        formValidate.removeError(el);
+                        this.removeError(el);
                     }
                     let checkboxes = form.querySelectorAll(".checkbox__input");
                     if (checkboxes.length > 0) for (let index = 0; index < checkboxes.length; index++) {
@@ -3787,7 +3849,7 @@
             if (forms.length) for (const form of forms) {
                 form.addEventListener("submit", (function(e) {
                     const form = e.target;
-                    if (!formValidate(form)) {
+                    if (formValidate.getErrors(form)) {
                         e.preventDefault();
                         return;
                     }
@@ -3795,44 +3857,25 @@
                 }));
                 form.addEventListener("reset", (function(e) {
                     const form = e.target;
-                    formClean(form);
-                }));
-            }
-            function formValidate(form) {
-                let error = 0;
-                const formRequiredItems = form.querySelectorAll("[data-required]");
-                if (formRequiredItems.length) formRequiredItems.forEach((item => {
-                    const input = item.querySelector("input, textarea");
-                    if (input) if ("" === input.value.trim()) {
-                        formAddError(input);
-                        error++;
-                    } else formRemoveError(input);
-                }));
-                return 0 === error;
-            }
-            function formAddError(input) {
-                input.classList.add("_error");
-                input.parentElement.classList.add("_error");
-            }
-            function formRemoveError(input) {
-                input.classList.remove("_error");
-                input.parentElement.classList.remove("_error");
-            }
-            function formClean(form) {
-                const inputs = form.querySelectorAll("input, textarea");
-                inputs.forEach((input => {
-                    input.value = "";
-                    formRemoveError(input);
+                    formValidate.formClean(form);
+                    clearFileInputs(form);
                 }));
             }
             async function formSubmitAction(form, e) {
                 e.preventDefault();
                 const formAction = form.getAttribute("action");
-                const formMethod = form.getAttribute("method") || "POST";
+                if (!formAction || formAction.includes(".html")) {
+                    showResultMessage("Ошибка: указан неверный адрес отправки формы", true, form);
+                    return;
+                }
+                const formMethod = form.getAttribute("method")?.toUpperCase() || "POST";
                 const formData = new FormData(form);
                 const fileInput = form.querySelector('input[type="file"]');
-                if (fileInput?.files?.length > 0) for (let i = 0; i < fileInput.files.length; i++) formData.append("file", fileInput.files[i]);
+                if (fileInput?.files?.length > 0) Array.from(fileInput.files).forEach((file => {
+                    formData.append(fileInput.name || "files[]", file);
+                }));
                 form.classList.add("_sending");
+                showResultMessage("Отправка данных...", false, form);
                 try {
                     const response = await fetch(formAction, {
                         method: formMethod,
@@ -3841,45 +3884,63 @@
                             Accept: "application/json"
                         }
                     });
-                    const responseText = await response.text();
-                    let result;
-                    try {
-                        result = JSON.parse(responseText);
-                    } catch {
-                        if (response.ok) result = {
-                            success: true,
-                            message: responseText
-                        }; else throw new Error(responseText || "Ошибка сервера");
-                    }
-                    if (!response.ok) throw new Error(result.message || "Ошибка сервера");
+                    const result = await parseResponse(response);
+                    if (!response.ok || false === result.success) throw new Error(result.message || "Ошибка сервера");
                     form.classList.remove("_sending");
+                    showResultMessage(result.message || "Форма успешно отправлена", false, form);
+                    form.reset();
+                    clearFileInputs(form);
+                    const previewsContainer = form.querySelector(".form__previews");
+                    if (previewsContainer) previewsContainer.innerHTML = "";
                     formSent(form, result);
                 } catch (error) {
                     form.classList.remove("_sending");
                     console.error("Ошибка отправки:", error);
-                    alert("Ошибка: " + (error.message || "При отправке формы произошла ошибка"));
+                    showResultMessage(extractErrorMessage(error), true, form);
                 }
+            }
+            function clearFileInputs(form) {
+                const fileInputs = form.querySelectorAll('input[type="file"]');
+                fileInputs.forEach((input => {
+                    input.value = "";
+                }));
+                if ("undefined" !== typeof fileList) fileList.length = 0;
             }
             function formSent(form, responseResult = {}) {
-                const fileInput = form.querySelector('input[type="file"]');
-                if (fileInput) fileInput.value = "";
-                const previewContainer = form.querySelector(".form__previews");
-                if (previewContainer) previewContainer.innerHTML = "";
-                if ("undefined" !== typeof fileList) fileList.length = 0;
                 document.dispatchEvent(new CustomEvent("formSent", {
                     detail: {
-                        form
+                        form,
+                        response: responseResult
                     }
                 }));
-                if (modules_flsModules.popup) {
-                    const popup = form.dataset.popupMessage;
-                    popup ? modules_flsModules.popup.open(popup) : null;
-                }
-                formClean(form);
+                const popupId = form.dataset.popupMessage;
+                if (popupId) if ("undefined" !== typeof FLSModules && FLSModules.popup) FLSModules.popup.open(popupId); else if ("undefined" !== typeof modules_flsModules && modules_flsModules.popup) modules_flsModules.popup.open(popupId); else if ("undefined" !== typeof MicroModal) MicroModal.show(popupId.replace("#", "")); else console.warn("Не найдена реализация попапов");
+                formValidate.formClean(form);
                 formLogging("Форма отправлена!");
             }
+            function parseResponse(response) {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) return response.json();
+                return response.text();
+            }
+            function showResultMessage(message, isError, form) {
+                const resultElement = form.querySelector(".form-result");
+                if (resultElement) {
+                    resultElement.textContent = message;
+                    resultElement.style.display = "block";
+                    resultElement.classList.toggle("_error", isError);
+                    resultElement.classList.toggle("_success", !isError);
+                    if (!isError) setTimeout((() => {
+                        resultElement.style.display = "none";
+                    }), 5e3);
+                }
+            }
+            function extractErrorMessage(error) {
+                if (error instanceof Error) return error.message;
+                return String(error);
+            }
             function formLogging(message) {
-                functions_FLS(`[Формы]: ${message}`);
+                console.log(`[Формы]: ${message}`);
             }
         }
         __webpack_require__(125);
@@ -3887,10 +3948,18 @@
         if (telephone) Inputmask({
             mask: "+7 (999) - 999 - 99 - 99"
         }).mask(telephone);
-        const phone = document.querySelectorAll(".phone");
-        if (phone) Inputmask({
-            mask: "+7 999 99 99"
-        }).mask(phone);
+        const phoneInputs = document.querySelectorAll(".phone");
+        phoneInputs.forEach((input => {
+            input.addEventListener("focus", (function() {
+                if (!this.hasAttribute("data-mask-applied")) {
+                    Inputmask({
+                        mask: "+7(999)-999-99-99",
+                        showMaskOnHover: false
+                    }).mask(this);
+                    this.setAttribute("data-mask-applied", "true");
+                }
+            }));
+        }));
         function isObject(obj) {
             return null !== obj && "object" === typeof obj && "constructor" in obj && obj.constructor === Object;
         }
