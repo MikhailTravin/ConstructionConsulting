@@ -3885,8 +3885,8 @@
                         }
                     });
                     const result = await parseResponse(response);
+                    console.log("Full response:", result);
                     if (!response.ok || false === result.success) throw new Error(result.message || "Ошибка сервера");
-                    form.classList.remove("_sending");
                     showResultMessage(result.message || "Форма успешно отправлена", false, form);
                     form.reset();
                     clearFileInputs(form);
@@ -3913,15 +3913,32 @@
                         response: responseResult
                     }
                 }));
-                const popupId = form.dataset.popupMessage;
-                if (popupId) if ("undefined" !== typeof FLSModules && FLSModules.popup) FLSModules.popup.open(popupId); else if ("undefined" !== typeof modules_flsModules && modules_flsModules.popup) modules_flsModules.popup.open(popupId); else if ("undefined" !== typeof MicroModal) MicroModal.show(popupId.replace("#", "")); else console.warn("Не найдена реализация попапов");
+                if (false !== responseResult.success) {
+                    const popupId = form.dataset.popupMessage;
+                    if (popupId) if ("undefined" !== typeof FLSModules && FLSModules.popup) FLSModules.popup.open(popupId); else if ("undefined" !== typeof modules_flsModules && modules_flsModules.popup) modules_flsModules.popup.open(popupId); else if ("undefined" !== typeof MicroModal) MicroModal.show(popupId.replace("#", "")); else console.warn("Не найдена реализация попапов");
+                }
                 formValidate.formClean(form);
                 formLogging("Форма отправлена!");
             }
-            function parseResponse(response) {
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) return response.json();
-                return response.text();
+            async function parseResponse(response) {
+                try {
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) return await response.json();
+                    const text = await response.text();
+                    try {
+                        return JSON.parse(text);
+                    } catch {
+                        return {
+                            success: false,
+                            message: text
+                        };
+                    }
+                } catch (error) {
+                    return {
+                        success: false,
+                        message: error.message
+                    };
+                }
             }
             function showResultMessage(message, isError, form) {
                 const resultElement = form.querySelector(".form-result");
