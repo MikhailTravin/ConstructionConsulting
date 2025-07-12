@@ -330,12 +330,12 @@ export function formSubmit() {
 			});
 
 			const result = await parseResponse(response);
+			console.log('Full response:', result); // Добавьте это для отладки
 
 			if (!response.ok || result.success === false) {
 				throw new Error(result.message || 'Ошибка сервера');
 			}
 
-			form.classList.remove('_sending');
 			showResultMessage(result.message || 'Форма успешно отправлена', false, form);
 
 			// Очищаем форму
@@ -376,21 +376,23 @@ export function formSubmit() {
 			}
 		}));
 
-		// Показываем попап
-		const popupId = form.dataset.popupMessage;
-		if (popupId) {
-			// Проверяем разные варианты реализации попапов
-			if (typeof FLSModules !== 'undefined' && FLSModules.popup) {
-				FLSModules.popup.open(popupId);
-			}
-			else if (typeof flsModules !== 'undefined' && flsModules.popup) {
-				flsModules.popup.open(popupId);
-			}
-			else if (typeof MicroModal !== 'undefined') {
-				MicroModal.show(popupId.replace('#', ''));
-			}
-			else {
-				console.warn('Не найдена реализация попапов');
+		// Показываем попап только если success === true или не определен
+		if (responseResult.success !== false) {
+			const popupId = form.dataset.popupMessage;
+			if (popupId) {
+				// Проверяем разные варианты реализации попапов
+				if (typeof FLSModules !== 'undefined' && FLSModules.popup) {
+					FLSModules.popup.open(popupId);
+				}
+				else if (typeof flsModules !== 'undefined' && flsModules.popup) {
+					flsModules.popup.open(popupId);
+				}
+				else if (typeof MicroModal !== 'undefined') {
+					MicroModal.show(popupId.replace('#', ''));
+				}
+				else {
+					console.warn('Не найдена реализация попапов');
+				}
 			}
 		}
 
@@ -398,12 +400,22 @@ export function formSubmit() {
 		formLogging('Форма отправлена!');
 	}
 
-	function parseResponse(response) {
-		const contentType = response.headers.get('content-type');
-		if (contentType && contentType.includes('application/json')) {
-			return response.json();
+	async function parseResponse(response) {
+		try {
+			const contentType = response.headers.get('content-type');
+			if (contentType && contentType.includes('application/json')) {
+				return await response.json();
+			}
+			const text = await response.text();
+			try {
+				// Попробуем распарсить как JSON, даже если content-type не указан
+				return JSON.parse(text);
+			} catch {
+				return { success: false, message: text };
+			}
+		} catch (error) {
+			return { success: false, message: error.message };
 		}
-		return response.text();
 	}
 
 	function showResultMessage(message, isError, form) {
