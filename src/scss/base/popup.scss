@@ -57,7 +57,7 @@ body::after {
 	transform: scale(0);
 	position: relative;
 	transition: transform 0.3s ease 0s;
-	background-color: #fff;
+	background-color: #f2f2f2;
 	padding: 39px 70px 30px 70px;
 	width: 100%;
 	max-width: 525px;
@@ -152,12 +152,12 @@ body::after {
 	&__input {
 		padding: 0px 40px 6px 0px;
 		position: relative;
-		border-bottom: 3px solid #aeadad;
+		border-bottom: 2px solid #aeadad;
 		&._form-error {
-			border-bottom: 3px solid $red;
+			border-bottom: 2px solid $red;
 		}
 		&.input-phone {
-			border-bottom: 3px solid $red;
+			border-bottom: 2px solid $red;
 		}
 		&._form-focus {
 			.form-popup__placeholder {
@@ -170,6 +170,7 @@ body::after {
 			}
 		}
 		input {
+			background-color: transparent;
 			width: 100%;
 			font-size: 18px;
 			color: #000000;
