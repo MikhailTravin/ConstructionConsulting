@@ -3853,12 +3853,27 @@
                         e.preventDefault();
                         return;
                     }
+                    if ("regform" === form.id) {
+                        const captchaContainer = form.querySelector(".g-recaptcha");
+                        const smartTokenInput = captchaContainer?.querySelector('input[name="smart-token"]');
+                        const smartToken = smartTokenInput?.value;
+                        const captchaTokenInput = document.getElementById("captchaToken");
+                        const captchaToken = captchaTokenInput?.value;
+                        if (!smartToken && !captchaToken) {
+                            e.preventDefault();
+                            showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
+                            highlightCaptchaError(captchaContainer);
+                            return;
+                        }
+                        if (smartToken && !captchaToken) captchaTokenInput.value = smartToken;
+                    }
                     formSubmitAction(form, e);
                 }));
                 form.addEventListener("reset", (function(e) {
                     const form = e.target;
                     formValidate.formClean(form);
                     clearFileInputs(form);
+                    if ("regform" === form.id) resetCaptcha();
                 }));
             }
             async function formSubmitAction(form, e) {
@@ -3870,6 +3885,10 @@
                 }
                 const formMethod = form.getAttribute("method")?.toUpperCase() || "POST";
                 const formData = new FormData(form);
+                if ("regform" === form.id) {
+                    const captchaToken = document.getElementById("captchaToken")?.value;
+                    if (captchaToken) formData.append("captcha_token", captchaToken);
+                }
                 const fileInput = form.querySelector('input[type="file"]');
                 if (fileInput?.files?.length > 0) Array.from(fileInput.files).forEach((file => {
                     formData.append(fileInput.name || "files[]", file);
@@ -3885,11 +3904,11 @@
                         }
                     });
                     const result = await parseResponse(response);
-                    console.log("Full response:", result);
                     if (!response.ok || false === result.success) throw new Error(result.message || "Ошибка сервера");
                     showResultMessage(result.message || "Форма успешно отправлена", false, form);
                     form.reset();
                     clearFileInputs(form);
+                    if ("regform" === form.id) resetCaptcha();
                     const previewsContainer = form.querySelector(".form__previews");
                     if (previewsContainer) previewsContainer.innerHTML = "";
                     formSent(form, result);
@@ -3897,6 +3916,24 @@
                     form.classList.remove("_sending");
                     console.error("Ошибка отправки:", error);
                     showResultMessage(extractErrorMessage(error), true, form);
+                    if ("regform" === form.id) resetCaptcha();
+                }
+            }
+            function highlightCaptchaError(captchaContainer) {
+                if (!captchaContainer) return;
+                captchaContainer.classList.add("_captcha-error");
+                captchaContainer.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }
+            function resetCaptcha() {
+                const captchaTokenInput = document.getElementById("captchaToken");
+                if (captchaTokenInput) captchaTokenInput.value = "";
+                const captchaContainer = document.querySelector(".g-recaptcha");
+                if (captchaContainer) {
+                    captchaContainer.classList.remove("_captcha-error");
+                    if (window.smartCaptcha && "function" === typeof window.smartCaptcha.reset) window.smartCaptcha.reset();
                 }
             }
             function clearFileInputs(form) {
@@ -3915,7 +3952,7 @@
                 }));
                 if (false !== responseResult.success) {
                     const popupId = form.dataset.popupMessage;
-                    if (popupId) if ("undefined" !== typeof FLSModules && FLSModules.popup) FLSModules.popup.open(popupId); else if ("undefined" !== typeof modules_flsModules && modules_flsModules.popup) modules_flsModules.popup.open(popupId); else if ("undefined" !== typeof MicroModal) MicroModal.show(popupId.replace("#", "")); else console.warn("Не найдена реализация попапов");
+                    if (popupId) if ("undefined" !== typeof FLSModules && FLSModules.popup) FLSModules.popup.open(popupId); else if ("undefined" !== typeof modules_flsModules && modules_flsModules.popup) modules_flsModules.popup.open(popupId); else if ("undefined" !== typeof MicroModal) MicroModal.show(popupId.replace("#", ""));
                 }
                 formValidate.formClean(form);
                 formLogging("Форма отправлена!");
