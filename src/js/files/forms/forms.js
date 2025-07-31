@@ -283,10 +283,35 @@ export function formSubmit() {
 		for (const form of forms) {
 			form.addEventListener('submit', function (e) {
 				const form = e.target;
+
+				// 1. Сначала стандартная валидация полей
 				if (formValidate.getErrors(form)) {
 					e.preventDefault();
 					return;
 				}
+
+				// 2. Для формы регистрации - проверка капчи
+				if (form.id === 'regform') {
+					const captchaContainer = form.querySelector('.g-recaptcha');
+					const smartTokenInput = captchaContainer?.querySelector('input[name="smart-token"]');
+					const smartToken = smartTokenInput?.value;
+					const captchaTokenInput = document.getElementById('captchaToken');
+					const captchaToken = captchaTokenInput?.value;
+
+					// Проверяем наличие хотя бы одного токена
+					if (!smartToken && !captchaToken) {
+						e.preventDefault();
+						showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
+						highlightCaptchaError(captchaContainer);
+						return;
+					}
+
+					// Синхронизируем токены если нужно
+					if (smartToken && !captchaToken) {
+						captchaTokenInput.value = smartToken;
+					}
+				}
+
 				formSubmitAction(form, e);
 			});
 
@@ -294,6 +319,10 @@ export function formSubmit() {
 				const form = e.target;
 				formValidate.formClean(form);
 				clearFileInputs(form);
+
+				if (form.id === 'regform') {
+					resetCaptcha();
+				}
 			});
 		}
 	}
@@ -309,8 +338,16 @@ export function formSubmit() {
 
 		const formMethod = form.getAttribute('method')?.toUpperCase() || 'POST';
 		const formData = new FormData(form);
-		const fileInput = form.querySelector('input[type="file"]');
 
+		// Для формы регистрации добавляем токен капчи
+		if (form.id === 'regform') {
+			const captchaToken = document.getElementById('captchaToken')?.value;
+			if (captchaToken) {
+				formData.append('captcha_token', captchaToken);
+			}
+		}
+
+		const fileInput = form.querySelector('input[type="file"]');
 		if (fileInput?.files?.length > 0) {
 			Array.from(fileInput.files).forEach(file => {
 				formData.append(fileInput.name || 'files[]', file);
@@ -330,32 +367,61 @@ export function formSubmit() {
 			});
 
 			const result = await parseResponse(response);
-			console.log('Full response:', result); // Добавьте это для отладки
 
 			if (!response.ok || result.success === false) {
 				throw new Error(result.message || 'Ошибка сервера');
 			}
 
 			showResultMessage(result.message || 'Форма успешно отправлена', false, form);
-
-			// Очищаем форму
 			form.reset();
 			clearFileInputs(form);
 
-			// Очищаем превью файлов
+			if (form.id === 'regform') {
+				resetCaptcha();
+			}
+
 			const previewsContainer = form.querySelector('.form__previews');
 			if (previewsContainer) previewsContainer.innerHTML = '';
 
-			// Вызываем кастомное событие и показываем попап
 			formSent(form, result);
 
 		} catch (error) {
 			form.classList.remove('_sending');
 			console.error('Ошибка отправки:', error);
 			showResultMessage(extractErrorMessage(error), true, form);
+
+			if (form.id === 'regform') {
+				resetCaptcha();
+			}
 		}
 	}
 
+	// Функции для работы с капчей
+	function highlightCaptchaError(captchaContainer) {
+		if (!captchaContainer) return;
+		captchaContainer.classList.add('_captcha-error');
+		captchaContainer.scrollIntoView({
+			behavior: 'smooth',
+			block: 'center'
+		});
+	}
+
+	function resetCaptcha() {
+		const captchaTokenInput = document.getElementById('captchaToken');
+		if (captchaTokenInput) captchaTokenInput.value = '';
+
+		const captchaContainer = document.querySelector('.g-recaptcha');
+		if (captchaContainer) {
+			captchaContainer.classList.remove('_captcha-error');
+
+			// Сброс виджета капчи если поддерживается API
+			if (window.smartCaptcha && typeof window.smartCaptcha.reset === 'function') {
+				window.smartCaptcha.reset();
+			}
+		}
+	}
+
+	// Остальные вспомогательные функции
 	function clearFileInputs(form) {
 		const fileInputs = form.querySelectorAll('input[type="file"]');
 		fileInputs.forEach(input => {
@@ -368,7 +434,6 @@ export function formSubmit() {
 	}
 
 	function formSent(form, responseResult = {}) {
-		// Диспатчим кастомное событие
 		document.dispatchEvent(new CustomEvent("formSent", {
 			detail: {
 				form: form,
@@ -376,11 +441,9 @@ export function formSubmit() {
 			}
 		}));
 
-		// Показываем попап только если success === true или не определен
 		if (responseResult.success !== false) {
 			const popupId = form.dataset.popupMessage;
 			if (popupId) {
-				// Проверяем разные варианты реализации попапов
 				if (typeof FLSModules !== 'undefined' && FLSModules.popup) {
 					FLSModules.popup.open(popupId);
 				}
@@ -389,9 +452,6 @@ export function formSubmit() {
 				}
 				else if (typeof MicroModal !== 'undefined') {
 					MicroModal.show(popupId.replace('#', ''));
-				}
-				else {
-					console.warn('Не найдена реализация попапов');
 				}
 			}
 		}
@@ -408,7 +468,6 @@ export function formSubmit() {
 			}
 			const text = await response.text();
 			try {
-				// Попробуем распарсить как JSON, даже если content-type не указан
 				return JSON.parse(text);
 			} catch {
 				return { success: false, message: text };
@@ -419,16 +478,13 @@ export function formSubmit() {
 	}
 
 	function showResultMessage(message, isError, form) {
-		// Ищем элемент результата внутри формы
 		const resultElement = form.querySelector('.form-result');
-
 		if (resultElement) {
 			resultElement.textContent = message;
 			resultElement.style.display = 'block';
 			resultElement.classList.toggle('_error', isError);
 			resultElement.classList.toggle('_success', !isError);
 
-			// Скрываем сообщение через 5 секунд
 			if (!isError) {
 				setTimeout(() => {
 					resultElement.style.display = 'none';
@@ -447,6 +503,30 @@ export function formSubmit() {
 	function formLogging(message) {
 		console.log(`[Формы]: ${message}`);
 	}
+}
+
+// Callback для капчи
+function onCaptchaSuccess(token) {
+	const captchaTokenInput = document.getElementById('captchaToken');
+	if (captchaTokenInput) {
+		captchaTokenInput.value = token;
+
+		// Убираем подсветку ошибки
+		const captchaContainer = document.querySelector('.g-recaptcha');
+		if (captchaContainer) {
+			captchaContainer.classList.remove('_captcha-error');
+		}
+
+		// Скрываем сообщение об ошибке
+		const errorMessage = document.querySelector('#regform .form-result._error');
+		if (errorMessage) {
+			errorMessage.style.display = 'none';
+		}
+	}
+
+	// Активируем кнопку отправки
+	const submitButton = document.querySelector('#regform button[type="submit"]');
+	if (submitButton) submitButton.disabled = false;
 }
 /* Модуль форми "кількість" */
 export function formQuantity() {
