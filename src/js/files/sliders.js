@@ -81,13 +81,10 @@ function initTabsSliders() {
 	if (tabsSliders.length > 0) {
 		tabsSliders.forEach((slider) => {
 			const sliderContainer = slider.closest('.tabs__sliders');
-			const prevButton = sliderContainer.querySelector('.tabs__arrow-prev');
-			const nextButton = sliderContainer.querySelector('.tabs__arrow-next');
+			const prevButton = sliderContainer?.querySelector('.tabs__arrow-prev');
+			const nextButton = sliderContainer?.querySelector('.tabs__arrow-next');
 
-			const tabItem = slider.closest('[role="tabpanel"]');
-			const isActiveTab = tabItem ? tabItem.classList.contains('_active') : true;
-
-			new Swiper(slider, {
+			const swiper = new Swiper(slider, {
 				modules: [Navigation],
 				observer: true,
 				observeParents: true,
@@ -113,30 +110,43 @@ function initTabsSliders() {
 				slide.addEventListener('click', function () {
 					const slideId = this.getAttribute('data-id');
 
-					document.querySelectorAll('.bottom-tabs__column').forEach(column => {
-						column.classList.remove('_active');
-						if (column.getAttribute('data-id') === slideId) {
-							column.classList.add('_active');
+					// Находим родительский tabs__sliders и соответствующий bottom-tabs
+					const parentTabs = slider.closest('.tabs__sliders');
+					const bottomTabs = parentTabs.nextElementSibling;
+
+					if (bottomTabs && bottomTabs.classList.contains('bottom-tabs')) {
+						// Удаляем _active у всех колонок в этом bottom-tabs
+						bottomTabs.querySelectorAll('.bottom-tabs__column').forEach(column => {
+							column.classList.remove('_active');
+						});
+
+						// Активируем соответствующую колонку
+						const correspondingColumn = bottomTabs.querySelector(`.bottom-tabs__column[data-id="${slideId}"]`);
+						if (correspondingColumn) {
+							correspondingColumn.classList.add('_active');
 						}
-					});
+					}
 				});
 			});
 
-			// Только для активной вкладки — активируем первый слайд
-			if (isActiveTab && !slider.dataset.initialized) {
+			if (!slider.dataset.initialized) {
 				const firstSlide = slider.querySelector('.tabs__slide');
 				if (firstSlide) {
 					const firstSlideId = firstSlide.getAttribute('data-id');
-					const correspondingBlock = document.querySelector(`.bottom-tabs__column[data-id="${firstSlideId}"]`);
-					if (correspondingBlock) {
-						// Удаляем _active у всех bottom-tabs__column перед установкой
-						document.querySelectorAll('.bottom-tabs__column._active').forEach(col => {
-							col.classList.remove('_active');
-						});
-						correspondingBlock.classList.add('_active');
+
+					const parentTabs = slider.closest('.tabs__sliders');
+					const bottomTabs = parentTabs.nextElementSibling;
+
+					if (bottomTabs && bottomTabs.classList.contains('bottom-tabs')) {
+						const correspondingColumn = bottomTabs.querySelector(`.bottom-tabs__column[data-id="${firstSlideId}"]`);
+						if (correspondingColumn) {
+							bottomTabs.querySelectorAll('.bottom-tabs__column').forEach(col => {
+								col.classList.remove('_active');
+							});
+							correspondingColumn.classList.add('_active');
+						}
 					}
 				}
-
 				slider.dataset.initialized = 'true';
 			}
 		});
