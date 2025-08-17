@@ -136,55 +136,6 @@ if (input) {
         input.files = dataTransfer.files;
     }
 }
-/*
-let input = document.querySelector('input[type="file"]');
-
-if (input) {
-    const preview = document.querySelector('.form__previews');
-    const fileList = [];
-
-    input.addEventListener('change', onChange);
-
-    function onChange() {
-        const files = input.files;
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-
-            const item = document.createElement('div');
-            item.classList.add('form__preview');
-
-            const fileName = document.createElement('span');
-            fileName.textContent = file.name;
-            fileName.classList.add('file-name');
-
-            const remove = document.createElement('div');
-            remove.classList.add('form__preview-close');
-
-            const fileItem = {
-                name: file.name,
-                modified: file.lastModified,
-                size: file.size,
-            };
-
-            fileList.push(fileItem);
-
-            remove.addEventListener('click', () => {
-                fileList.splice(fileList.indexOf(fileItem), 1);
-                item.classList.add('removing');
-                setTimeout(() => item.remove(), 100);
-            });
-
-            item.appendChild(remove);
-            item.appendChild(fileName);
-            preview.appendChild(item);
-        }
-
-        // Логируем выбранные файлы
-        console.log('Выбранные файлы:', files);
-    }
-}
-*/
 
 //========================================================================================================================================================
 
