@@ -4375,6 +4375,12 @@ h2 {
   position: relative;
 }
 
+.swiper-wrapper._centered {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
 .swiper-vertical .swiper-wrapper {
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
