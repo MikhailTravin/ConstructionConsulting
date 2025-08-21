@@ -104,6 +104,12 @@ body::after {
 		}
 	}
 
+	.form__file span {
+		color: #e50707;
+		width: 100%;
+		justify-content: center;
+	}
+
 	// .form-popup__title
 
 	&__title {
@@ -169,6 +175,9 @@ body::after {
 				opacity: 0;
 			}
 		}
+		&.form-textarea {
+			border: 2px solid #aeadad;
+		}
 		input {
 			background-color: transparent;
 			width: 100%;
@@ -183,6 +192,20 @@ body::after {
 				font-size: 15px;
 			}
 			&.password {
+				color: #6d6d6d;
+			}
+		}
+		textarea {
+			font-size: 14px;
+			padding: 10px 10px;
+			width: 100%;
+			background-color: transparent;
+			resize: none;
+			height: 150px;
+			color: #000000;
+			font-weight: 400;
+			&::placeholder {
+				font-weight: 250;
 				color: #6d6d6d;
 			}
 		}
