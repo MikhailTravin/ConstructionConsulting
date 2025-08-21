@@ -3853,33 +3853,21 @@
                         e.preventDefault();
                         return;
                     }
-                    const captchaContainer = form.querySelector(".g-recaptcha, .smart-captcha");
-                    if (captchaContainer) {
-                        const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
-                        const smartToken = smartTokenInput?.value;
-                        const captchaTokenInput = document.getElementById("captchaToken");
-                        const captchaToken = captchaTokenInput?.value;
-                        if (!smartToken && !captchaToken) {
-                            e.preventDefault();
-                            showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
-                            highlightCaptchaError(captchaContainer);
-                            return;
+                    if (form.classList.contains("captcha")) {
+                        const captchaContainer = form.querySelector(".g-recaptcha, .smart-captcha");
+                        if (captchaContainer) {
+                            const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
+                            const smartToken = smartTokenInput?.value;
+                            const captchaTokenInput = document.getElementById("captchaToken");
+                            const captchaToken = captchaTokenInput?.value;
+                            if (!smartToken && !captchaToken) {
+                                e.preventDefault();
+                                showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
+                                highlightCaptchaError(captchaContainer);
+                                return;
+                            }
+                            if (smartToken && !captchaToken) captchaTokenInput.value = smartToken;
                         }
-                        if (smartToken && !captchaToken) captchaTokenInput.value = smartToken;
-                    }
-                    if ("regform" === form.id) {
-                        const captchaContainer = form.querySelector(".g-recaptcha");
-                        const smartTokenInput = captchaContainer?.querySelector('input[name="smart-token"]');
-                        const smartToken = smartTokenInput?.value;
-                        const captchaTokenInput = document.getElementById("captchaToken");
-                        const captchaToken = captchaTokenInput?.value;
-                        if (!smartToken && !captchaToken) {
-                            e.preventDefault();
-                            showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
-                            highlightCaptchaError(captchaContainer);
-                            return;
-                        }
-                        if (smartToken && !captchaToken) captchaTokenInput.value = smartToken;
                     }
                     formSubmitAction(form, e);
                 }));
@@ -3887,7 +3875,7 @@
                     const form = e.target;
                     formValidate.formClean(form);
                     clearFileInputs(form);
-                    if ("regform" === form.id) resetCaptcha();
+                    if (form.classList.contains("captcha")) resetCaptcha();
                 }));
             }
             async function formSubmitAction(form, e) {
@@ -3899,7 +3887,7 @@
                 }
                 const formMethod = form.getAttribute("method")?.toUpperCase() || "POST";
                 const formData = new FormData(form);
-                if ("regform" === form.id) {
+                if (form.classList.contains("captcha")) {
                     const captchaToken = document.getElementById("captchaToken")?.value;
                     if (captchaToken) formData.append("captcha_token", captchaToken);
                 }
@@ -3922,7 +3910,7 @@
                     showResultMessage(result.message || "Форма успешно отправлена", false, form);
                     form.reset();
                     clearFileInputs(form);
-                    if ("regform" === form.id) resetCaptcha();
+                    if (form.classList.contains("captcha")) resetCaptcha();
                     const previewsContainer = form.querySelector(".form__previews");
                     if (previewsContainer) previewsContainer.innerHTML = "";
                     formSent(form, result);
@@ -3930,7 +3918,7 @@
                     form.classList.remove("_sending");
                     console.error("Ошибка отправки:", error);
                     showResultMessage(extractErrorMessage(error), true, form);
-                    if ("regform" === form.id) resetCaptcha();
+                    if (form.classList.contains("captcha")) resetCaptcha();
                 }
             }
             function highlightCaptchaError(captchaContainer) {
@@ -8965,19 +8953,22 @@ PERFORMANCE OF THIS SOFTWARE.
         document.addEventListener("DOMContentLoaded", (() => {
             indents();
         }));
-        let input = document.querySelector('input[type="file"]');
-        let script_fileList = [];
-        if (input) {
-            const preview = document.querySelector(".form__previews");
-            input.addEventListener("change", onChange);
-            function onChange() {
-                for (let i = 0; i < input.files.length; i++) if (!script_fileList.some((f => f.name === input.files[i].name && f.size === input.files[i].size))) script_fileList.push(input.files[i]);
+        document.querySelectorAll('.form__file input[type="file"]').forEach((input => {
+            let fileList = [];
+            const previewContainer = input.closest(".form-popup__inputs").querySelector(".form__previews");
+            input.addEventListener("change", (function() {
+                for (let i = 0; i < this.files.length; i++) if (!fileList.some((f => f.name === this.files[i].name && f.size === this.files[i].size))) fileList.push(this.files[i]);
                 updatePreview();
                 updateFileInput();
-            }
+            }));
             function updatePreview() {
-                preview.innerHTML = "";
-                script_fileList.forEach(((file, index) => {
+                previewContainer.innerHTML = "";
+                if (0 === fileList.length) {
+                    previewContainer.style.display = "none";
+                    return;
+                }
+                previewContainer.style.display = "block";
+                fileList.forEach(((file, index) => {
                     const item = document.createElement("div");
                     item.classList.add("form__preview");
                     const fileName = document.createElement("span");
@@ -8985,23 +8976,27 @@ PERFORMANCE OF THIS SOFTWARE.
                     fileName.classList.add("file-name");
                     const remove = document.createElement("div");
                     remove.classList.add("form__preview-close");
+                    remove.textContent = "×";
+                    remove.title = "Удалить файл";
                     remove.addEventListener("click", (e => {
                         e.stopPropagation();
-                        script_fileList.splice(index, 1);
+                        fileList.splice(index, 1);
                         updateFileInput();
                         updatePreview();
                     }));
                     item.appendChild(remove);
                     item.appendChild(fileName);
-                    preview.appendChild(item);
+                    previewContainer.appendChild(item);
                 }));
             }
             function updateFileInput() {
                 const dataTransfer = new DataTransfer;
-                script_fileList.forEach((file => dataTransfer.items.add(file)));
+                fileList.forEach((file => dataTransfer.items.add(file)));
                 input.files = dataTransfer.files;
             }
-        }
+            const existingPreviews = previewContainer.querySelectorAll(".form__preview");
+            if (existingPreviews.length > 0) previewContainer.style.display = "block"; else previewContainer.style.display = "none";
+        }));
         const inputContainer = document.querySelector(".bottom-header__input");
         if (inputContainer) {
             const input = document.querySelector(".bottom-header__input input");

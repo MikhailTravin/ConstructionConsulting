@@ -405,6 +405,14 @@ body::after {
   opacity: 0.8;
 }
 
+.form-popup .form__file span {
+  color: #e50707;
+  width: 100%;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
 .form-popup__title {
   font-size: 28px;
   color: #010000;
@@ -455,6 +463,10 @@ body::after {
   opacity: 0;
 }
 
+.form-popup__input.form-textarea {
+  border: 2px solid #aeadad;
+}
+
 .form-popup__input input {
   background-color: transparent;
   width: 100%;
@@ -489,6 +501,42 @@ body::after {
 }
 
 .form-popup__input input.password {
+  color: #6d6d6d;
+}
+
+.form-popup__input textarea {
+  font-size: 14px;
+  padding: 10px 10px;
+  width: 100%;
+  background-color: transparent;
+  resize: none;
+  height: 150px;
+  color: #000000;
+  font-weight: 400;
+}
+
+.form-popup__input textarea::-webkit-input-placeholder {
+  font-weight: 250;
+  color: #6d6d6d;
+}
+
+.form-popup__input textarea::-moz-placeholder {
+  font-weight: 250;
+  color: #6d6d6d;
+}
+
+.form-popup__input textarea:-ms-input-placeholder {
+  font-weight: 250;
+  color: #6d6d6d;
+}
+
+.form-popup__input textarea::-ms-input-placeholder {
+  font-weight: 250;
+  color: #6d6d6d;
+}
+
+.form-popup__input textarea::placeholder {
+  font-weight: 250;
   color: #6d6d6d;
 }
 
