@@ -291,6 +291,27 @@ export function formSubmit() {
 				}
 
 				// 2. Для формы регистрации - проверка капчи
+				// 2. Проверка капчи для всех форм, где есть капча
+				const captchaContainer = form.querySelector('.g-recaptcha, .smart-captcha');
+				if (captchaContainer) {
+					const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
+					const smartToken = smartTokenInput?.value;
+					const captchaTokenInput = document.getElementById('captchaToken');
+					const captchaToken = captchaTokenInput?.value;
+
+					// Проверяем наличие хотя бы одного токена
+					if (!smartToken && !captchaToken) {
+						e.preventDefault();
+						showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
+						highlightCaptchaError(captchaContainer);
+						return;
+					}
+
+					// Синхронизируем токены если нужно
+					if (smartToken && !captchaToken) {
+						captchaTokenInput.value = smartToken;
+					}
+				}
 				if (form.id === 'regform') {
 					const captchaContainer = form.querySelector('.g-recaptcha');
 					const smartTokenInput = captchaContainer?.querySelector('input[name="smart-token"]');
