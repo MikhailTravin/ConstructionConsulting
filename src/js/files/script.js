@@ -84,28 +84,32 @@ document.addEventListener('DOMContentLoaded', () => {
 //========================================================================================================================================================
 
 //Прикрепить фото
-// Обработчик для файлового ввода
-let input = document.querySelector('input[type="file"]');
-let fileList = []; // Храним File объекты
+// Инициализация всех блоков загрузки файлов
+document.querySelectorAll('.form__file input[type="file"]').forEach(input => {
+    let fileList = []; // Храним File объекты для каждого инпута
 
-if (input) {
-    const preview = document.querySelector('.form__previews');
+    const previewContainer = input.closest('.form-popup__inputs').querySelector('.form__previews');
 
-    input.addEventListener('change', onChange);
-
-    function onChange() {
+    input.addEventListener('change', function () {
         // Добавляем новые файлы
-        for (let i = 0; i < input.files.length; i++) {
-            if (!fileList.some(f => f.name === input.files[i].name && f.size === input.files[i].size)) {
-                fileList.push(input.files[i]);
+        for (let i = 0; i < this.files.length; i++) {
+            if (!fileList.some(f => f.name === this.files[i].name && f.size === this.files[i].size)) {
+                fileList.push(this.files[i]);
             }
         }
         updatePreview();
         updateFileInput();
-    }
+    });
 
     function updatePreview() {
-        preview.innerHTML = '';
+        previewContainer.innerHTML = '';
+        if (fileList.length === 0) {
+            previewContainer.style.display = 'none';
+            return;
+        }
+
+        previewContainer.style.display = 'block';
+
         fileList.forEach((file, index) => {
             const item = document.createElement('div');
             item.classList.add('form__preview');
@@ -116,6 +120,8 @@ if (input) {
 
             const remove = document.createElement('div');
             remove.classList.add('form__preview-close');
+            remove.textContent = '×';
+            remove.title = 'Удалить файл';
 
             remove.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -126,7 +132,7 @@ if (input) {
 
             item.appendChild(remove);
             item.appendChild(fileName);
-            preview.appendChild(item);
+            previewContainer.appendChild(item);
         });
     }
 
@@ -135,7 +141,17 @@ if (input) {
         fileList.forEach(file => dataTransfer.items.add(file));
         input.files = dataTransfer.files;
     }
-}
+
+    // Инициализация существующих превью (если есть)
+    const existingPreviews = previewContainer.querySelectorAll('.form__preview');
+    if (existingPreviews.length > 0) {
+        // Можно добавить логику для восстановления fileList из существующих превью
+        // если это необходимо при загрузке страницы
+        previewContainer.style.display = 'block';
+    } else {
+        previewContainer.style.display = 'none';
+    }
+});
 
 //========================================================================================================================================================
 

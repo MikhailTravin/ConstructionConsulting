@@ -277,6 +277,7 @@ export let formValidate = {
 }
 
 // Отправка форм
+// Отправка форм
 export function formSubmit() {
 	const forms = document.forms;
 	if (forms.length) {
@@ -290,46 +291,27 @@ export function formSubmit() {
 					return;
 				}
 
-				// 2. Для формы регистрации - проверка капчи
-				// 2. Проверка капчи для всех форм, где есть капча
-				const captchaContainer = form.querySelector('.g-recaptcha, .smart-captcha');
-				if (captchaContainer) {
-					const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
-					const smartToken = smartTokenInput?.value;
-					const captchaTokenInput = document.getElementById('captchaToken');
-					const captchaToken = captchaTokenInput?.value;
+				// 2. Проверка капчи только для форм с классом captcha
+				if (form.classList.contains('captcha')) {
+					const captchaContainer = form.querySelector('.g-recaptcha, .smart-captcha');
+					if (captchaContainer) {
+						const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
+						const smartToken = smartTokenInput?.value;
+						const captchaTokenInput = document.getElementById('captchaToken');
+						const captchaToken = captchaTokenInput?.value;
 
-					// Проверяем наличие хотя бы одного токена
-					if (!smartToken && !captchaToken) {
-						e.preventDefault();
-						showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
-						highlightCaptchaError(captchaContainer);
-						return;
-					}
+						// Проверяем наличие хотя бы одного токена
+						if (!smartToken && !captchaToken) {
+							e.preventDefault();
+							showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
+							highlightCaptchaError(captchaContainer);
+							return;
+						}
 
-					// Синхронизируем токены если нужно
-					if (smartToken && !captchaToken) {
-						captchaTokenInput.value = smartToken;
-					}
-				}
-				if (form.id === 'regform') {
-					const captchaContainer = form.querySelector('.g-recaptcha');
-					const smartTokenInput = captchaContainer?.querySelector('input[name="smart-token"]');
-					const smartToken = smartTokenInput?.value;
-					const captchaTokenInput = document.getElementById('captchaToken');
-					const captchaToken = captchaTokenInput?.value;
-
-					// Проверяем наличие хотя бы одного токена
-					if (!smartToken && !captchaToken) {
-						e.preventDefault();
-						showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
-						highlightCaptchaError(captchaContainer);
-						return;
-					}
-
-					// Синхронизируем токены если нужно
-					if (smartToken && !captchaToken) {
-						captchaTokenInput.value = smartToken;
+						// Синхронизируем токены если нужно
+						if (smartToken && !captchaToken) {
+							captchaTokenInput.value = smartToken;
+						}
 					}
 				}
 
@@ -341,7 +323,8 @@ export function formSubmit() {
 				formValidate.formClean(form);
 				clearFileInputs(form);
 
-				if (form.id === 'regform') {
+				// Сброс капчи только для форм с классом captcha
+				if (form.classList.contains('captcha')) {
 					resetCaptcha();
 				}
 			});
@@ -360,8 +343,8 @@ export function formSubmit() {
 		const formMethod = form.getAttribute('method')?.toUpperCase() || 'POST';
 		const formData = new FormData(form);
 
-		// Для формы регистрации добавляем токен капчи
-		if (form.id === 'regform') {
+		// Добавляем токен капчи только для форм с классом captcha
+		if (form.classList.contains('captcha')) {
 			const captchaToken = document.getElementById('captchaToken')?.value;
 			if (captchaToken) {
 				formData.append('captcha_token', captchaToken);
@@ -397,7 +380,8 @@ export function formSubmit() {
 			form.reset();
 			clearFileInputs(form);
 
-			if (form.id === 'regform') {
+			// Сброс капчи только для форм с классом captcha
+			if (form.classList.contains('captcha')) {
 				resetCaptcha();
 			}
 
@@ -411,7 +395,8 @@ export function formSubmit() {
 			console.error('Ошибка отправки:', error);
 			showResultMessage(extractErrorMessage(error), true, form);
 
-			if (form.id === 'regform') {
+			// Сброс капчи только для форм с классом captcha
+			if (form.classList.contains('captcha')) {
 				resetCaptcha();
 			}
 		}
@@ -539,14 +524,14 @@ function onCaptchaSuccess(token) {
 		}
 
 		// Скрываем сообщение об ошибке
-		const errorMessage = document.querySelector('#regform .form-result._error');
+		const errorMessage = document.querySelector('.captcha .form-result._error');
 		if (errorMessage) {
 			errorMessage.style.display = 'none';
 		}
 	}
 
-	// Активируем кнопку отправки
-	const submitButton = document.querySelector('#regform button[type="submit"]');
+	// Активируем кнопку отправки для форм с капчей
+	const submitButton = document.querySelector('.captcha button[type="submit"]');
 	if (submitButton) submitButton.disabled = false;
 }
 /* Модуль форми "кількість" */
