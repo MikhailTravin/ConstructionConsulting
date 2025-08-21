@@ -3853,6 +3853,20 @@
                         e.preventDefault();
                         return;
                     }
+                    const captchaContainer = form.querySelector(".g-recaptcha, .smart-captcha");
+                    if (captchaContainer) {
+                        const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
+                        const smartToken = smartTokenInput?.value;
+                        const captchaTokenInput = document.getElementById("captchaToken");
+                        const captchaToken = captchaTokenInput?.value;
+                        if (!smartToken && !captchaToken) {
+                            e.preventDefault();
+                            showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
+                            highlightCaptchaError(captchaContainer);
+                            return;
+                        }
+                        if (smartToken && !captchaToken) captchaTokenInput.value = smartToken;
+                    }
                     if ("regform" === form.id) {
                         const captchaContainer = form.querySelector(".g-recaptcha");
                         const smartTokenInput = captchaContainer?.querySelector('input[name="smart-token"]');
