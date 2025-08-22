@@ -84,11 +84,37 @@ document.addEventListener('DOMContentLoaded', () => {
 //========================================================================================================================================================
 
 //Прикрепить фото
-// Инициализация всех блоков загрузки файлов
 document.querySelectorAll('.form__file input[type="file"]').forEach(input => {
     let fileList = []; // Храним File объекты для каждого инпута
 
-    const previewContainer = input.closest('.form-popup__inputs').querySelector('.form__previews');
+    // Ищем контейнер для превью разными способами
+    let previewContainer = null;
+
+    // Попытка 1: ищем внутри .form-popup__inputs (для второй формы)
+    const formPopupInputs = input.closest('.form-popup__inputs');
+    if (formPopupInputs) {
+        previewContainer = formPopupInputs.querySelector('.form__previews');
+    }
+
+    // Попытка 2: если не нашли, ищем внутри .form__bottom (для первой формы)
+    if (!previewContainer) {
+        const formBottom = input.closest('.form__bottom');
+        if (formBottom) {
+            previewContainer = formBottom.querySelector('.form__previews');
+        }
+    }
+
+    // Попытка 3: если все еще не нашли, ищем в ближайшем родителе
+    if (!previewContainer) {
+        const parent = input.closest('.form__file').parentElement;
+        previewContainer = parent.querySelector('.form__previews');
+    }
+
+    // Если контейнер не найден, создаем его
+    if (!previewContainer) {
+        console.warn('Не найден .form__previews для input', input);
+        return; // Пропускаем этот инпут
+    }
 
     input.addEventListener('change', function () {
         // Добавляем новые файлы
@@ -120,8 +146,6 @@ document.querySelectorAll('.form__file input[type="file"]').forEach(input => {
 
             const remove = document.createElement('div');
             remove.classList.add('form__preview-close');
-            remove.textContent = '×';
-            remove.title = 'Удалить файл';
 
             remove.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -146,7 +170,6 @@ document.querySelectorAll('.form__file input[type="file"]').forEach(input => {
     const existingPreviews = previewContainer.querySelectorAll('.form__preview');
     if (existingPreviews.length > 0) {
         // Можно добавить логику для восстановления fileList из существующих превью
-        // если это необходимо при загрузке страницы
         previewContainer.style.display = 'block';
     } else {
         previewContainer.style.display = 'none';

@@ -277,7 +277,6 @@ export let formValidate = {
 }
 
 // Отправка форм
-// Отправка форм
 export function formSubmit() {
 	const forms = document.forms;
 	if (forms.length) {
@@ -377,16 +376,26 @@ export function formSubmit() {
 			}
 
 			showResultMessage(result.message || 'Форма успешно отправлена', false, form);
-			form.reset();
-			clearFileInputs(form);
 
-			// Сброс капчи только для форм с классом captcha
-			if (form.classList.contains('captcha')) {
-				resetCaptcha();
+			// Обработка редиректа
+			if (result.redirect) {
+				// Показываем сообщение об успехе на короткое время перед редиректом
+				setTimeout(() => {
+					window.location.href = result.redirect;
+				}, 1500);
+			} else {
+				// Стандартное поведение если редиректа нет
+				form.reset();
+				clearFileInputs(form);
+
+				// Сброс капчи только для форм с классом captcha
+				if (form.classList.contains('captcha')) {
+					resetCaptcha();
+				}
+
+				const previewsContainer = form.querySelector('.form__previews');
+				if (previewsContainer) previewsContainer.innerHTML = '';
 			}
-
-			const previewsContainer = form.querySelector('.form__previews');
-			if (previewsContainer) previewsContainer.innerHTML = '';
 
 			formSent(form, result);
 
@@ -462,8 +471,12 @@ export function formSubmit() {
 			}
 		}
 
-		formValidate.formClean(form);
-		formLogging('Форма отправлена!');
+		// Не очищаем форму если был редирект
+		if (!responseResult.redirect) {
+			formValidate.formClean(form);
+		}
+
+		formLogging('Форма отправлена!' + (responseResult.redirect ? ` Редирект на: ${responseResult.redirect}` : ''));
 	}
 
 	async function parseResponse(response) {
