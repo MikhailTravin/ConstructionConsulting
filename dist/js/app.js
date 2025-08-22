@@ -3908,11 +3908,15 @@
                     const result = await parseResponse(response);
                     if (!response.ok || false === result.success) throw new Error(result.message || "Ошибка сервера");
                     showResultMessage(result.message || "Форма успешно отправлена", false, form);
-                    form.reset();
-                    clearFileInputs(form);
-                    if (form.classList.contains("captcha")) resetCaptcha();
-                    const previewsContainer = form.querySelector(".form__previews");
-                    if (previewsContainer) previewsContainer.innerHTML = "";
+                    if (result.redirect) setTimeout((() => {
+                        window.location.href = result.redirect;
+                    }), 1500); else {
+                        form.reset();
+                        clearFileInputs(form);
+                        if (form.classList.contains("captcha")) resetCaptcha();
+                        const previewsContainer = form.querySelector(".form__previews");
+                        if (previewsContainer) previewsContainer.innerHTML = "";
+                    }
                     formSent(form, result);
                 } catch (error) {
                     form.classList.remove("_sending");
@@ -3956,8 +3960,8 @@
                     const popupId = form.dataset.popupMessage;
                     if (popupId) if ("undefined" !== typeof FLSModules && FLSModules.popup) FLSModules.popup.open(popupId); else if ("undefined" !== typeof modules_flsModules && modules_flsModules.popup) modules_flsModules.popup.open(popupId); else if ("undefined" !== typeof MicroModal) MicroModal.show(popupId.replace("#", ""));
                 }
-                formValidate.formClean(form);
-                formLogging("Форма отправлена!");
+                if (!responseResult.redirect) formValidate.formClean(form);
+                formLogging("Форма отправлена!" + (responseResult.redirect ? ` Редирект на: ${responseResult.redirect}` : ""));
             }
             async function parseResponse(response) {
                 try {
@@ -8955,7 +8959,21 @@ PERFORMANCE OF THIS SOFTWARE.
         }));
         document.querySelectorAll('.form__file input[type="file"]').forEach((input => {
             let fileList = [];
-            const previewContainer = input.closest(".form-popup__inputs").querySelector(".form__previews");
+            let previewContainer = null;
+            const formPopupInputs = input.closest(".form-popup__inputs");
+            if (formPopupInputs) previewContainer = formPopupInputs.querySelector(".form__previews");
+            if (!previewContainer) {
+                const formBottom = input.closest(".form__bottom");
+                if (formBottom) previewContainer = formBottom.querySelector(".form__previews");
+            }
+            if (!previewContainer) {
+                const parent = input.closest(".form__file").parentElement;
+                previewContainer = parent.querySelector(".form__previews");
+            }
+            if (!previewContainer) {
+                console.warn("Не найден .form__previews для input", input);
+                return;
+            }
             input.addEventListener("change", (function() {
                 for (let i = 0; i < this.files.length; i++) if (!fileList.some((f => f.name === this.files[i].name && f.size === this.files[i].size))) fileList.push(this.files[i]);
                 updatePreview();
@@ -8976,8 +8994,6 @@ PERFORMANCE OF THIS SOFTWARE.
                     fileName.classList.add("file-name");
                     const remove = document.createElement("div");
                     remove.classList.add("form__preview-close");
-                    remove.textContent = "×";
-                    remove.title = "Удалить файл";
                     remove.addEventListener("click", (e => {
                         e.stopPropagation();
                         fileList.splice(index, 1);

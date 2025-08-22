@@ -4120,11 +4120,23 @@ h2 {
 
 .services-tabs {
   margin: 98px 0px 0px 0px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 20px;
+}
+
+.services-tabs.services-float {
   overflow: hidden;
+  display: block;
+  gap: 0px;
+}
+
+.services-tabs.services-float .services-tabs__image {
+  float: right;
 }
 
 .services-tabs__image {
-  float: right;
   margin: 0 0 20px 20px;
   max-width: 560px;
   width: 100%;
@@ -6747,8 +6759,11 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
     gap: 10px;
   }
 
-  .services-tabs__image {
+  .services-tabs.services-float .services-tabs__image {
     float: none;
+  }
+
+  .services-tabs__image {
     margin: 20px auto;
     max-width: 100%;
   }
