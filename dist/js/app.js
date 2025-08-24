@@ -6986,20 +6986,7 @@
                             slidesPerView: 7
                         }
                     },
-                    on: {
-                        init: function() {
-                            const slidesCount = this.slides.length;
-                            const slidesPerView = this.params.slidesPerView;
-                            const wrapper = this.wrapperEl;
-                            if (slidesCount < slidesPerView) wrapper.classList.add("_centered"); else wrapper.classList.remove("_centered");
-                        },
-                        resize: function() {
-                            const slidesCount = this.slides.length;
-                            const slidesPerView = this.params.slidesPerView;
-                            const wrapper = this.wrapperEl;
-                            if (slidesCount < slidesPerView) wrapper.classList.add("_centered"); else wrapper.classList.remove("_centered");
-                        }
-                    }
+                    on: {}
                 });
                 const slides = slider.querySelectorAll(".tabs__slide");
                 slides.forEach((slide => {
