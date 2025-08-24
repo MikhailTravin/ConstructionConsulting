@@ -104,29 +104,6 @@ function initTabsSliders() {
 					1650: { slidesPerView: 7 },
 				},
 				on: {
-					init: function () {
-						const slidesCount = this.slides.length;
-						const slidesPerView = this.params.slidesPerView;
-						const wrapper = this.wrapperEl;
-
-						if (slidesCount < slidesPerView) {
-							wrapper.classList.add('_centered');
-						} else {
-							wrapper.classList.remove('_centered');
-						}
-					},
-					resize: function () {
-						// Обновляем при изменении размера (на случай, если slidesPerView изменился)
-						const slidesCount = this.slides.length;
-						const slidesPerView = this.params.slidesPerView;
-						const wrapper = this.wrapperEl;
-
-						if (slidesCount < slidesPerView) {
-							wrapper.classList.add('_centered');
-						} else {
-							wrapper.classList.remove('_centered');
-						}
-					}
 				}
 			});
 
