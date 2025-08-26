@@ -2406,7 +2406,7 @@ h2 {
   top: 50%;
   width: 54px;
   height: 54px;
-  right: 20px;
+  left: 20px;
   background: #e50707;
   border-radius: 50%;
   border: 1px solid transparent;
@@ -6403,6 +6403,7 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
   .images-product__arrow-prev {
     width: 35px;
     height: 35px;
+    left: 10px;
   }
 
   .images-product__arrow-prev .triangle-arrow-prev {
@@ -6415,6 +6416,7 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
   .images-product__arrow-next {
     width: 35px;
     height: 35px;
+    right: 10px;
   }
 
   .images-product__arrow-next .triangle-arrow-next {

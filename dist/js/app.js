@@ -8927,10 +8927,6 @@ PERFORMANCE OF THIS SOFTWARE.
                 himagesSwiper = Number(himagesSwiper.slice(0, himagesSwiper.length - 2));
                 let himagesSwiperDesc = window.getComputedStyle(imagesSwiperDesc[0]).height;
                 himagesSwiperDesc = Number(himagesSwiperDesc.slice(0, himagesSwiperDesc.length - 2));
-                const sumMainHomePrev = (wimagesSlider - wimagesSliderContainer) / 2;
-                const sumMainHomeNext = (wimagesSlider - wimagesSliderContainer) / 2;
-                arrowPrev.style.left = `${sumMainHomePrev}px`;
-                arrowNext.style.right = `${sumMainHomeNext}px`;
                 arrowPrev.style.top = `calc(48% - ${himagesSwiperDesc / 2}px)`;
                 arrowNext.style.top = `calc(48% - ${himagesSwiperDesc / 2}px)`;
             }
