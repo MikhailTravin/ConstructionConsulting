@@ -851,7 +851,7 @@
         top: 50%;
         width: 54px;
         height: 54px;
-        right: 20px;
+        left: 20px;
         background: $red;
         border-radius: 50%;
         border: 1px solid transparent;
@@ -867,6 +867,7 @@
         @media (max-width: $mobile) {
             width: 35px;
             height: 35px;
+            left: 10px;
         }
         .triangle-arrow-prev {
             position: relative;
@@ -910,6 +911,7 @@
         @media (max-width: $mobile) {
             width: 35px;
             height: 35px;
+            right: 10px;
         }
         .triangle-arrow-next {
             width: 0;
