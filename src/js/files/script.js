@@ -31,6 +31,7 @@ function indents() {
     }
 
     // Слайдер навигация
+    
     let arrowPrev = document.querySelector('.images-product__arrow-prev');
     let arrowNext = document.querySelector('.images-product__arrow-next');
     const imagesSliderContainer = document.querySelector('.images-product__container-arrows');
@@ -58,13 +59,16 @@ function indents() {
         const sumMainHomeNext = ((wimagesSlider - wimagesSliderContainer) / 2);
 
         // Устанавливаем позицию по горизонтали
+        /*
         arrowPrev.style.left = `${sumMainHomePrev}px`;
         arrowNext.style.right = `${sumMainHomeNext}px`;
+        */
 
         // Устанавливаем позицию по вертикали, учитывая высоту imagesSwiperDesc
         arrowPrev.style.top = `calc(48% - ${himagesSwiperDesc / 2}px)`;
         arrowNext.style.top = `calc(48% - ${himagesSwiperDesc / 2}px)`;
     }
+    
 }
 
 // Обработчики событий
