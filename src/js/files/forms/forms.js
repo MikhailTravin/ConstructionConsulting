@@ -277,41 +277,13 @@ export let formValidate = {
 }
 
 // Отправка форм
+// Глобальная переменная для хранения функции отправки (временная, только для связи с капчей)
+let globalFormSubmitAction = null;
+
 export function formSubmit() {
 	const forms = document.forms;
 	if (forms.length) {
 		for (const form of forms) {
-			// Инициализация невидимой капчи для форм с классом captcha
-			if (form.classList.contains('captcha') && window.smartCaptcha) {
-				const captchaContainer = form.querySelector('#captcha-container');
-				if (captchaContainer) {
-					window.smartCaptcha.render('captcha-container', {
-						sitekey: 'ysc1_wwp8718dCXmdGW18h1UedVfP3iMcZBB2UfhYPiL2607c2e76',
-						invisible: true,
-						callback: function (token) {
-							// Сохраняем токен для отправки
-							const captchaTokenInput = document.getElementById('captchaToken');
-							if (captchaTokenInput) {
-								captchaTokenInput.value = token;
-							}
-
-							// Убираем подсветку ошибки
-							captchaContainer.classList.remove('_captcha-error');
-
-							// Скрываем сообщение об ошибке
-							const errorMessage = form.querySelector('.form-result._error');
-							if (errorMessage) {
-								errorMessage.style.display = 'none';
-							}
-
-							// Активируем кнопку отправки
-							const submitButton = form.querySelector('button[type="submit"]');
-							if (submitButton) submitButton.disabled = false;
-						}
-					});
-				}
-			}
-
 			form.addEventListener('submit', function (e) {
 				const form = e.target;
 
@@ -323,25 +295,59 @@ export function formSubmit() {
 
 				// 2. Проверка капчи только для форм с классом captcha
 				if (form.classList.contains('captcha')) {
-					const captchaContainer = form.querySelector('.smart-captcha');
-					if (captchaContainer && window.smartCaptcha) {
+					const captchaContainer = form.querySelector('.g-recaptcha, .smart-captcha');
+					if (captchaContainer) {
+						// Если используется Yandex Smart Captcha
+						if (window.smartCaptcha) {
+							e.preventDefault();
+
+							// Инициализация при первом использовании
+							if (!captchaContainer.dataset.captchaRendered) {
+								const sitekey = captchaContainer.dataset.sitekey;
+								if (!sitekey) {
+									showResultMessage('Ошибка капчи: не указан data-sitekey', true, form);
+									return;
+								}
+
+								try {
+									window.smartCaptcha.render(captchaContainer, {
+										sitekey: sitekey,
+										invisible: true,
+										callback: onCaptchaSuccess,
+									});
+									captchaContainer.dataset.captchaRendered = 'true';
+								} catch (err) {
+									console.error('Ошибка инициализации Yandex Smart Captcha:', err);
+									showResultMessage('Ошибка капчи. Попробуйте позже.', true, form);
+									return;
+								}
+							}
+
+							// Запускаем проверку
+							window.smartCaptcha.execute();
+							return;
+						}
+
+						// Fallback: обычная проверка токена
+						const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
+						const smartToken = smartTokenInput?.value;
 						const captchaTokenInput = document.getElementById('captchaToken');
 						const captchaToken = captchaTokenInput?.value;
 
-						// Проверяем наличие токена
-						if (!captchaToken) {
+						if (!smartToken && !captchaToken) {
 							e.preventDefault();
-							// Запускаем невидимую капчу
-							window.smartCaptcha.execute();
-
-							// Показываем сообщение и подсвечиваем ошибку
 							showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
 							highlightCaptchaError(captchaContainer);
 							return;
 						}
+
+						if (smartToken && !captchaToken) {
+							captchaTokenInput.value = smartToken;
+						}
 					}
 				}
 
+				// Отправляем форму напрямую
 				formSubmitAction(form, e);
 			});
 
@@ -350,13 +356,15 @@ export function formSubmit() {
 				formValidate.formClean(form);
 				clearFileInputs(form);
 
-				// Сброс капчи только для форм с классом captcha
-				if (form.classList.contains('captcha') && window.smartCaptcha) {
+				if (form.classList.contains('captcha')) {
 					resetCaptcha();
 				}
 			});
 		}
 	}
+
+	// === ВАЖНО: Сохраняем ссылку на formSubmitAction, чтобы onCaptchaSuccess могла её вызвать ===
+	globalFormSubmitAction = formSubmitAction;
 
 	async function formSubmitAction(form, e) {
 		e.preventDefault();
@@ -370,7 +378,6 @@ export function formSubmit() {
 		const formMethod = form.getAttribute('method')?.toUpperCase() || 'POST';
 		const formData = new FormData(form);
 
-		// Добавляем токен капчи только для форм с классом captcha
 		if (form.classList.contains('captcha')) {
 			const captchaToken = document.getElementById('captchaToken')?.value;
 			if (captchaToken) {
@@ -405,19 +412,15 @@ export function formSubmit() {
 
 			showResultMessage(result.message || 'Форма успешно отправлена', false, form);
 
-			// Обработка редиректа
 			if (result.redirect) {
-				// Показываем сообщение об успехе на короткое время перед редиректом
 				setTimeout(() => {
 					window.location.href = result.redirect;
 				}, 1500);
 			} else {
-				// Стандартное поведение если редиректа нет
 				form.reset();
 				clearFileInputs(form);
 
-				// Сброс капчи только для форм с классом captcha
-				if (form.classList.contains('captcha') && window.smartCaptcha) {
+				if (form.classList.contains('captcha')) {
 					resetCaptcha();
 				}
 
@@ -432,14 +435,13 @@ export function formSubmit() {
 			console.error('Ошибка отправки:', error);
 			showResultMessage(extractErrorMessage(error), true, form);
 
-			// Сброс капчи только для форм с классом captcha
-			if (form.classList.contains('captcha') && window.smartCaptcha) {
+			if (form.classList.contains('captcha')) {
 				resetCaptcha();
 			}
 		}
 	}
 
-	// Функции для работы с капчей
+	// Остальные функции (без изменений)
 	function highlightCaptchaError(captchaContainer) {
 		if (!captchaContainer) return;
 		captchaContainer.classList.add('_captcha-error');
@@ -453,18 +455,15 @@ export function formSubmit() {
 		const captchaTokenInput = document.getElementById('captchaToken');
 		if (captchaTokenInput) captchaTokenInput.value = '';
 
-		const captchaContainer = document.querySelector('.smart-captcha');
+		const captchaContainer = document.querySelector('.g-recaptcha');
 		if (captchaContainer) {
 			captchaContainer.classList.remove('_captcha-error');
-
-			// Сброс виджета капчи если поддерживается API
 			if (window.smartCaptcha && typeof window.smartCaptcha.reset === 'function') {
 				window.smartCaptcha.reset();
 			}
 		}
 	}
 
-	// Остальные вспомогательные функции
 	function clearFileInputs(form) {
 		const fileInputs = form.querySelectorAll('input[type="file"]');
 		fileInputs.forEach(input => {
@@ -489,17 +488,14 @@ export function formSubmit() {
 			if (popupId) {
 				if (typeof FLSModules !== 'undefined' && FLSModules.popup) {
 					FLSModules.popup.open(popupId);
-				}
-				else if (typeof flsModules !== 'undefined' && flsModules.popup) {
+				} else if (typeof flsModules !== 'undefined' && flsModules.popup) {
 					flsModules.popup.open(popupId);
-				}
-				else if (typeof MicroModal !== 'undefined') {
+				} else if (typeof MicroModal !== 'undefined') {
 					MicroModal.show(popupId.replace('#', ''));
 				}
 			}
 		}
 
-		// Не очищаем форму если был редирект
 		if (!responseResult.redirect) {
 			formValidate.formClean(form);
 		}
@@ -552,50 +548,36 @@ export function formSubmit() {
 	}
 }
 
-// Инициализация при загрузке страницы
-function onloadFunction() {
-	if (!window.smartCaptcha) {
-		console.warn('SmartCaptcha не загружена');
-		return;
+// === Глобальная функция, вызываемая из Yandex Captcha ===
+function onCaptchaSuccess(token) {
+	const captchaTokenInput = document.getElementById('captchaToken');
+	if (captchaTokenInput) {
+		captchaTokenInput.value = token;
 	}
 
-	// Автоматическая инициализация для всех форм с классом captcha
-	const captchaForms = document.querySelectorAll('form.captcha');
-	captchaForms.forEach(form => {
-		const captchaContainer = form.querySelector('#captcha-container');
-		if (captchaContainer) {
-			window.smartCaptcha.render('captcha-container', {
-				sitekey: '<ключ_клиентской_части>',
-				invisible: true,
-				callback: function (token) {
-					const captchaTokenInput = document.getElementById('captchaToken');
-					if (captchaTokenInput) {
-						captchaTokenInput.value = token;
-					}
+	const captchaContainer = document.querySelector('.g-recaptcha, .smart-captcha');
+	if (captchaContainer) {
+		captchaContainer.classList.remove('_captcha-error');
+	}
 
-					// Убираем подсветку ошибки
-					captchaContainer.classList.remove('_captcha-error');
+	const errorMessage = document.querySelector('.captcha .form-result._error');
+	if (errorMessage) {
+		errorMessage.style.display = 'none';
+	}
 
-					// Скрываем сообщение об ошибке
-					const errorMessage = form.querySelector('.form-result._error');
-					if (errorMessage) {
-						errorMessage.style.display = 'none';
-					}
-
-					// Активируем кнопку отправки
-					const submitButton = form.querySelector('button[type="submit"]');
-					if (submitButton) submitButton.disabled = false;
-				}
-			});
-		}
-	});
+	// Получаем форму через привязку к полю
+	const form = captchaTokenInput?.form;
+	if (form && globalFormSubmitAction) {
+		// Вызываем сохранённую функцию
+		globalFormSubmitAction(form, { preventDefault: () => { } });
+	} else {
+		console.error('formSubmitAction не доступна');
+	}
 }
 
-// Вызов инициализации при загрузке
-if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', onloadFunction);
-} else {
-	onloadFunction();
+// Инициализация (можно оставить пустой — инициализация при submit)
+function onloadFunction() {
+	// При желании можно здесь проинициализировать капчу заранее
 }
 /* Модуль форми "кількість" */
 export function formQuantity() {
