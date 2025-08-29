@@ -281,6 +281,37 @@ export function formSubmit() {
 	const forms = document.forms;
 	if (forms.length) {
 		for (const form of forms) {
+			// Инициализация невидимой капчи для форм с классом captcha
+			if (form.classList.contains('captcha') && window.smartCaptcha) {
+				const captchaContainer = form.querySelector('#captcha-container');
+				if (captchaContainer) {
+					window.smartCaptcha.render('captcha-container', {
+						sitekey: 'ysc1_wwp8718dCXmdGW18h1UedVfP3iMcZBB2UfhYPiL2607c2e76',
+						invisible: true,
+						callback: function (token) {
+							// Сохраняем токен для отправки
+							const captchaTokenInput = document.getElementById('captchaToken');
+							if (captchaTokenInput) {
+								captchaTokenInput.value = token;
+							}
+
+							// Убираем подсветку ошибки
+							captchaContainer.classList.remove('_captcha-error');
+
+							// Скрываем сообщение об ошибке
+							const errorMessage = form.querySelector('.form-result._error');
+							if (errorMessage) {
+								errorMessage.style.display = 'none';
+							}
+
+							// Активируем кнопку отправки
+							const submitButton = form.querySelector('button[type="submit"]');
+							if (submitButton) submitButton.disabled = false;
+						}
+					});
+				}
+			}
+
 			form.addEventListener('submit', function (e) {
 				const form = e.target;
 
@@ -292,24 +323,21 @@ export function formSubmit() {
 
 				// 2. Проверка капчи только для форм с классом captcha
 				if (form.classList.contains('captcha')) {
-					const captchaContainer = form.querySelector('.g-recaptcha, .smart-captcha');
-					if (captchaContainer) {
-						const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
-						const smartToken = smartTokenInput?.value;
+					const captchaContainer = form.querySelector('.smart-captcha');
+					if (captchaContainer && window.smartCaptcha) {
 						const captchaTokenInput = document.getElementById('captchaToken');
 						const captchaToken = captchaTokenInput?.value;
 
-						// Проверяем наличие хотя бы одного токена
-						if (!smartToken && !captchaToken) {
+						// Проверяем наличие токена
+						if (!captchaToken) {
 							e.preventDefault();
+							// Запускаем невидимую капчу
+							window.smartCaptcha.execute();
+
+							// Показываем сообщение и подсвечиваем ошибку
 							showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
 							highlightCaptchaError(captchaContainer);
 							return;
-						}
-
-						// Синхронизируем токены если нужно
-						if (smartToken && !captchaToken) {
-							captchaTokenInput.value = smartToken;
 						}
 					}
 				}
@@ -323,7 +351,7 @@ export function formSubmit() {
 				clearFileInputs(form);
 
 				// Сброс капчи только для форм с классом captcha
-				if (form.classList.contains('captcha')) {
+				if (form.classList.contains('captcha') && window.smartCaptcha) {
 					resetCaptcha();
 				}
 			});
@@ -389,7 +417,7 @@ export function formSubmit() {
 				clearFileInputs(form);
 
 				// Сброс капчи только для форм с классом captcha
-				if (form.classList.contains('captcha')) {
+				if (form.classList.contains('captcha') && window.smartCaptcha) {
 					resetCaptcha();
 				}
 
@@ -405,7 +433,7 @@ export function formSubmit() {
 			showResultMessage(extractErrorMessage(error), true, form);
 
 			// Сброс капчи только для форм с классом captcha
-			if (form.classList.contains('captcha')) {
+			if (form.classList.contains('captcha') && window.smartCaptcha) {
 				resetCaptcha();
 			}
 		}
@@ -425,7 +453,7 @@ export function formSubmit() {
 		const captchaTokenInput = document.getElementById('captchaToken');
 		if (captchaTokenInput) captchaTokenInput.value = '';
 
-		const captchaContainer = document.querySelector('.g-recaptcha');
+		const captchaContainer = document.querySelector('.smart-captcha');
 		if (captchaContainer) {
 			captchaContainer.classList.remove('_captcha-error');
 
@@ -524,28 +552,50 @@ export function formSubmit() {
 	}
 }
 
-// Callback для капчи
-function onCaptchaSuccess(token) {
-	const captchaTokenInput = document.getElementById('captchaToken');
-	if (captchaTokenInput) {
-		captchaTokenInput.value = token;
-
-		// Убираем подсветку ошибки
-		const captchaContainer = document.querySelector('.g-recaptcha');
-		if (captchaContainer) {
-			captchaContainer.classList.remove('_captcha-error');
-		}
-
-		// Скрываем сообщение об ошибке
-		const errorMessage = document.querySelector('.captcha .form-result._error');
-		if (errorMessage) {
-			errorMessage.style.display = 'none';
-		}
+// Инициализация при загрузке страницы
+function onloadFunction() {
+	if (!window.smartCaptcha) {
+		console.warn('SmartCaptcha не загружена');
+		return;
 	}
 
-	// Активируем кнопку отправки для форм с капчей
-	const submitButton = document.querySelector('.captcha button[type="submit"]');
-	if (submitButton) submitButton.disabled = false;
+	// Автоматическая инициализация для всех форм с классом captcha
+	const captchaForms = document.querySelectorAll('form.captcha');
+	captchaForms.forEach(form => {
+		const captchaContainer = form.querySelector('#captcha-container');
+		if (captchaContainer) {
+			window.smartCaptcha.render('captcha-container', {
+				sitekey: '<ключ_клиентской_части>',
+				invisible: true,
+				callback: function (token) {
+					const captchaTokenInput = document.getElementById('captchaToken');
+					if (captchaTokenInput) {
+						captchaTokenInput.value = token;
+					}
+
+					// Убираем подсветку ошибки
+					captchaContainer.classList.remove('_captcha-error');
+
+					// Скрываем сообщение об ошибке
+					const errorMessage = form.querySelector('.form-result._error');
+					if (errorMessage) {
+						errorMessage.style.display = 'none';
+					}
+
+					// Активируем кнопку отправки
+					const submitButton = form.querySelector('button[type="submit"]');
+					if (submitButton) submitButton.disabled = false;
+				}
+			});
+		}
+	});
+}
+
+// Вызов инициализации при загрузке
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', onloadFunction);
+} else {
+	onloadFunction();
 }
 /* Модуль форми "кількість" */
 export function formQuantity() {
