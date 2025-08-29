@@ -3847,6 +3847,22 @@
         function formSubmit() {
             const forms = document.forms;
             if (forms.length) for (const form of forms) {
+                if (form.classList.contains("captcha") && window.smartCaptcha) {
+                    const captchaContainer = form.querySelector("#captcha-container");
+                    if (captchaContainer) window.smartCaptcha.render("captcha-container", {
+                        sitekey: "ysc1_wwp8718dCXmdGW18h1UedVfP3iMcZBB2UfhYPiL2607c2e76",
+                        invisible: true,
+                        callback: function(token) {
+                            const captchaTokenInput = document.getElementById("captchaToken");
+                            if (captchaTokenInput) captchaTokenInput.value = token;
+                            captchaContainer.classList.remove("_captcha-error");
+                            const errorMessage = form.querySelector(".form-result._error");
+                            if (errorMessage) errorMessage.style.display = "none";
+                            const submitButton = form.querySelector('button[type="submit"]');
+                            if (submitButton) submitButton.disabled = false;
+                        }
+                    });
+                }
                 form.addEventListener("submit", (function(e) {
                     const form = e.target;
                     if (formValidate.getErrors(form)) {
@@ -3854,19 +3870,17 @@
                         return;
                     }
                     if (form.classList.contains("captcha")) {
-                        const captchaContainer = form.querySelector(".g-recaptcha, .smart-captcha");
-                        if (captchaContainer) {
-                            const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
-                            const smartToken = smartTokenInput?.value;
+                        const captchaContainer = form.querySelector(".smart-captcha");
+                        if (captchaContainer && window.smartCaptcha) {
                             const captchaTokenInput = document.getElementById("captchaToken");
                             const captchaToken = captchaTokenInput?.value;
-                            if (!smartToken && !captchaToken) {
+                            if (!captchaToken) {
                                 e.preventDefault();
+                                window.smartCaptcha.execute();
                                 showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
                                 highlightCaptchaError(captchaContainer);
                                 return;
                             }
-                            if (smartToken && !captchaToken) captchaTokenInput.value = smartToken;
                         }
                     }
                     formSubmitAction(form, e);
@@ -3875,7 +3889,7 @@
                     const form = e.target;
                     formValidate.formClean(form);
                     clearFileInputs(form);
-                    if (form.classList.contains("captcha")) resetCaptcha();
+                    if (form.classList.contains("captcha") && window.smartCaptcha) resetCaptcha();
                 }));
             }
             async function formSubmitAction(form, e) {
@@ -3913,7 +3927,7 @@
                     }), 1500); else {
                         form.reset();
                         clearFileInputs(form);
-                        if (form.classList.contains("captcha")) resetCaptcha();
+                        if (form.classList.contains("captcha") && window.smartCaptcha) resetCaptcha();
                         const previewsContainer = form.querySelector(".form__previews");
                         if (previewsContainer) previewsContainer.innerHTML = "";
                     }
@@ -3922,7 +3936,7 @@
                     form.classList.remove("_sending");
                     console.error("Ошибка отправки:", error);
                     showResultMessage(extractErrorMessage(error), true, form);
-                    if (form.classList.contains("captcha")) resetCaptcha();
+                    if (form.classList.contains("captcha") && window.smartCaptcha) resetCaptcha();
                 }
             }
             function highlightCaptchaError(captchaContainer) {
@@ -3936,7 +3950,7 @@
             function resetCaptcha() {
                 const captchaTokenInput = document.getElementById("captchaToken");
                 if (captchaTokenInput) captchaTokenInput.value = "";
-                const captchaContainer = document.querySelector(".g-recaptcha");
+                const captchaContainer = document.querySelector(".smart-captcha");
                 if (captchaContainer) {
                     captchaContainer.classList.remove("_captcha-error");
                     if (window.smartCaptcha && "function" === typeof window.smartCaptcha.reset) window.smartCaptcha.reset();
@@ -4003,6 +4017,30 @@
                 console.log(`[Формы]: ${message}`);
             }
         }
+        function onloadFunction() {
+            if (!window.smartCaptcha) {
+                console.warn("SmartCaptcha не загружена");
+                return;
+            }
+            const captchaForms = document.querySelectorAll("form.captcha");
+            captchaForms.forEach((form => {
+                const captchaContainer = form.querySelector("#captcha-container");
+                if (captchaContainer) window.smartCaptcha.render("captcha-container", {
+                    sitekey: "<ключ_клиентской_части>",
+                    invisible: true,
+                    callback: function(token) {
+                        const captchaTokenInput = document.getElementById("captchaToken");
+                        if (captchaTokenInput) captchaTokenInput.value = token;
+                        captchaContainer.classList.remove("_captcha-error");
+                        const errorMessage = form.querySelector(".form-result._error");
+                        if (errorMessage) errorMessage.style.display = "none";
+                        const submitButton = form.querySelector('button[type="submit"]');
+                        if (submitButton) submitButton.disabled = false;
+                    }
+                });
+            }));
+        }
+        if ("loading" === document.readyState) document.addEventListener("DOMContentLoaded", onloadFunction); else onloadFunction();
         __webpack_require__(125);
         const telephone = document.querySelectorAll(".telephone");
         if (telephone) Inputmask({
