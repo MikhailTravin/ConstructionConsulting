@@ -78,6 +78,61 @@ if (document.querySelector('.images-product')) { // Указываем скла�
 function initTabsSliders() {
 	const tabsSliders = document.querySelectorAll('.tabs-slider');
 
+	// Функция для получения параметра из URL
+	function getUrlParameter(name) {
+		name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+		const regex = new RegExp('[?&]' + name + '=([^&#]*)');
+		const results = regex.exec(location.search);
+		return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+	}
+
+	// Функция для получения хэша из URL
+	function getUrlHash() {
+		return window.location.hash.substring(1);
+	}
+
+	// Функция активации таба по ID
+	function activateTabById(tabId) {
+		if (!tabId) return false;
+
+		// Ищем слайд с нужным data-id
+		const targetSlide = document.querySelector(`.tabs__slide[data-id="${tabId}"]`);
+		if (!targetSlide) return false;
+
+		// Находим родительский слайдер
+		const slider = targetSlide.closest('.tabs__slider');
+		if (!slider) return false;
+
+		// Находим индекс слайда
+		const slides = Array.from(slider.querySelectorAll('.tabs__slide'));
+		const slideIndex = slides.indexOf(targetSlide);
+
+		if (slideIndex === -1) return false;
+
+		// Активируем слайд в Swiper
+		const swiperInstance = slider.swiper;
+		if (swiperInstance) {
+			swiperInstance.slideTo(slideIndex);
+		}
+
+		// Активируем соответствующую колонку в bottom-tabs
+		const parentTabs = slider.closest('.tabs__sliders');
+		const bottomTabs = parentTabs.nextElementSibling;
+
+		if (bottomTabs && bottomTabs.classList.contains('bottom-tabs')) {
+			bottomTabs.querySelectorAll('.bottom-tabs__column').forEach(column => {
+				column.classList.remove('_active');
+			});
+
+			const correspondingColumn = bottomTabs.querySelector(`.bottom-tabs__column[data-id="${tabId}"]`);
+			if (correspondingColumn) {
+				correspondingColumn.classList.add('_active');
+			}
+		}
+
+		return true;
+	}
+
 	if (tabsSliders.length > 0) {
 		tabsSliders.forEach((slider) => {
 			const sliderContainer = slider.closest('.tabs__sliders');
@@ -104,6 +159,16 @@ function initTabsSliders() {
 					1650: { slidesPerView: 7 },
 				},
 				on: {
+					init: function () {
+						// Проверяем параметры URL после инициализации Swiper
+						const tabIdFromParam = getUrlParameter('tab') || getUrlParameter('id') || getUrlHash();
+						if (tabIdFromParam) {
+							// Небольшая задержка для гарантии полной инициализации
+							setTimeout(() => {
+								activateTabById(tabIdFromParam);
+							}, 100);
+						}
+					}
 				}
 			});
 
@@ -157,7 +222,27 @@ function initTabsSliders() {
 
 document.addEventListener('DOMContentLoaded', function () {
 	initTabsSliders();
+
+	// Также обрабатываем изменения хэша (если нужно)
+	window.addEventListener('hashchange', function () {
+		const tabId = getUrlHash();
+		if (tabId) {
+			activateTabById(tabId);
+		}
+	});
 });
+
+// Добавляем функцию getUrlParameter в глобальную область видимости
+function getUrlParameter(name) {
+	name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+	const regex = new RegExp('[?&]' + name + '=([^&#]*)');
+	const results = regex.exec(location.search);
+	return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
+
+function getUrlHash() {
+	return window.location.hash.substring(1);
+}
 
 if (document.querySelector('.documents-tabs-slider')) { // Указываем скласс нужного слайдера
 	new Swiper('.documents-tabs-slider', {
