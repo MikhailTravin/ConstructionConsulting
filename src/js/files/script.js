@@ -31,7 +31,7 @@ function indents() {
     }
 
     // Слайдер навигация
-    
+
     let arrowPrev = document.querySelector('.images-product__arrow-prev');
     let arrowNext = document.querySelector('.images-product__arrow-next');
     const imagesSliderContainer = document.querySelector('.images-product__container-arrows');
@@ -68,7 +68,7 @@ function indents() {
         arrowPrev.style.top = `calc(48% - ${himagesSwiperDesc / 2}px)`;
         arrowNext.style.top = `calc(48% - ${himagesSwiperDesc / 2}px)`;
     }
-    
+
 }
 
 // Обработчики событий
@@ -220,4 +220,75 @@ inputs.forEach(input => {
     input.addEventListener('input', handleInput);
     // Проверка при загрузке страницы
     handleInput.call(input);
+});
+
+//========================================================================================================================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    function activateTabByParam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabNumber = urlParams.get('t');
+        
+        if (!tabNumber) return;
+        
+        const targetTab = document.querySelector(`.tabs__title[data-tab-hash="${tabNumber}"]`);
+        
+        if (targetTab) {
+            const tabTitles = document.querySelectorAll('.tabs__title');
+            const tabBodies = document.querySelectorAll('.tabs__body');
+            const tabIndex = Array.from(tabTitles).indexOf(targetTab);
+            
+            // Активируем вкладку
+            tabTitles.forEach(title => {
+                title.classList.remove('_tab-active');
+                title.removeAttribute('data-tabs-active');
+            });
+            
+            tabBodies.forEach(body => body.setAttribute('hidden', ''));
+            
+            targetTab.classList.add('_tab-active');
+            targetTab.setAttribute('data-tabs-active', '');
+            
+            if (tabBodies[tabIndex]) {
+                tabBodies[tabIndex].removeAttribute('hidden');
+            }
+            
+            // Прокручиваем к product-line с учетом header'а
+            const productLineElement = document.querySelector('.product-line');
+            if (productLineElement) {
+                // Получаем высоту header'а
+                const header = document.querySelector('header');
+                const headerHeight = header ? header.offsetHeight : 0;
+                
+                // Получаем позицию элемента product-line
+                const productLinePosition = productLineElement.getBoundingClientRect().top + window.pageYOffset;
+                
+                // Вычисляем конечную позицию с учетом header'а
+                const offsetPosition = productLinePosition - headerHeight - 20; // + небольшой отступ
+                
+                // Плавная прокрутка
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }
+    
+    // Обработка при загрузке и изменении URL
+    activateTabByParam();
+    window.addEventListener('popstate', activateTabByParam);
+    
+    // Обработка кликов по ссылкам
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a[href*="?t="]');
+        if (link) {
+            const url = new URL(link.href);
+            if (url.pathname === window.location.pathname) {
+                e.preventDefault(); // Предотвращаем стандартное поведение
+                history.pushState({}, '', url.href); // Меняем URL без перезагрузки
+                activateTabByParam();
+            }
+        }
+    });
 });
