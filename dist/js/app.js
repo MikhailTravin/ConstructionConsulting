@@ -9053,6 +9053,51 @@ PERFORMANCE OF THIS SOFTWARE.
             input.addEventListener("input", handleInput);
             handleInput.call(input);
         }));
+        document.addEventListener("DOMContentLoaded", (function() {
+            function activateTabByParam() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const tabNumber = urlParams.get("t");
+                if (!tabNumber) return;
+                const targetTab = document.querySelector(`.tabs__title[data-tab-hash="${tabNumber}"]`);
+                if (targetTab) {
+                    const tabTitles = document.querySelectorAll(".tabs__title");
+                    const tabBodies = document.querySelectorAll(".tabs__body");
+                    const tabIndex = Array.from(tabTitles).indexOf(targetTab);
+                    tabTitles.forEach((title => {
+                        title.classList.remove("_tab-active");
+                        title.removeAttribute("data-tabs-active");
+                    }));
+                    tabBodies.forEach((body => body.setAttribute("hidden", "")));
+                    targetTab.classList.add("_tab-active");
+                    targetTab.setAttribute("data-tabs-active", "");
+                    if (tabBodies[tabIndex]) tabBodies[tabIndex].removeAttribute("hidden");
+                    const productLineElement = document.querySelector(".product-line");
+                    if (productLineElement) {
+                        const header = document.querySelector("header");
+                        const headerHeight = header ? header.offsetHeight : 0;
+                        const productLinePosition = productLineElement.getBoundingClientRect().top + window.pageYOffset;
+                        const offsetPosition = productLinePosition - headerHeight - 20;
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                }
+            }
+            activateTabByParam();
+            window.addEventListener("popstate", activateTabByParam);
+            document.addEventListener("click", (function(e) {
+                const link = e.target.closest('a[href*="?t="]');
+                if (link) {
+                    const url = new URL(link.href);
+                    if (url.pathname === window.location.pathname) {
+                        e.preventDefault();
+                        history.pushState({}, "", url.href);
+                        activateTabByParam();
+                    }
+                }
+            }));
+        }));
         window["FLS"] = false;
         menuInit();
         spollers();
