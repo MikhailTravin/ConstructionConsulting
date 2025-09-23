@@ -224,69 +224,82 @@ inputs.forEach(input => {
 
 //========================================================================================================================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     function activateTabByParam() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tabNumber = urlParams.get('t');
-        
-        if (!tabNumber) return;
-        
-        const targetTab = document.querySelector(`.tabs__title[data-tab-hash="${tabNumber}"]`);
-        
-        if (targetTab) {
-            const tabTitles = document.querySelectorAll('.tabs__title');
-            const tabBodies = document.querySelectorAll('.tabs__body');
-            const tabIndex = Array.from(tabTitles).indexOf(targetTab);
-            
-            // Активируем вкладку
-            tabTitles.forEach(title => {
-                title.classList.remove('_tab-active');
-                title.removeAttribute('data-tabs-active');
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabNumber = urlParams.get('t');
+
+            if (!tabNumber) return;
+
+            // Ищем все возможные элементы с data-tab-hash
+            const targetElements = document.querySelectorAll(`[data-tab-hash="${tabNumber}"]`);
+
+            if (targetElements.length === 0) return;
+
+            // Обрабатываем каждый найденный элемент
+            targetElements.forEach(targetElement => {
+                if (targetElement.classList.contains('tabs__title')) {
+                    // Обработка вкладок
+                    const tabTitles = document.querySelectorAll('.tabs__title');
+                    const tabBodies = document.querySelectorAll('.tabs__body');
+                    const tabIndex = Array.from(tabTitles).indexOf(targetElement);
+
+                    tabTitles.forEach(title => title.classList.remove('_tab-active'));
+                    tabBodies.forEach(body => body.setAttribute('hidden', ''));
+
+                    targetElement.classList.add('_tab-active');
+
+                    if (tabBodies[tabIndex]) {
+                        tabBodies[tabIndex].removeAttribute('hidden');
+                    }
+
+                    scrollToElement('.product-line');
+
+                } else if (targetElement.classList.contains('installation-stage__title')) {
+                    // Обработка installation-stage
+                    const allTitles = document.querySelectorAll('.installation-stage__title');
+                    allTitles.forEach(title => title.classList.remove('_tab-active'));
+                    targetElement.classList.add('_tab-active');
+
+                    // Прокрутка к верху блока installation-stage delivery-object
+                    scrollToElement('.installation-stage.delivery-object');
+                }
             });
-            
-            tabBodies.forEach(body => body.setAttribute('hidden', ''));
-            
-            targetTab.classList.add('_tab-active');
-            targetTab.setAttribute('data-tabs-active', '');
-            
-            if (tabBodies[tabIndex]) {
-                tabBodies[tabIndex].removeAttribute('hidden');
-            }
-            
-            // Прокручиваем к product-line с учетом header'а
-            const productLineElement = document.querySelector('.product-line');
-            if (productLineElement) {
-                // Получаем высоту header'а
-                const header = document.querySelector('header');
-                const headerHeight = header ? header.offsetHeight : 0;
-                
-                // Получаем позицию элемента product-line
-                const productLinePosition = productLineElement.getBoundingClientRect().top + window.pageYOffset;
-                
-                // Вычисляем конечную позицию с учетом header'а
-                const offsetPosition = productLinePosition - headerHeight - 20; // + небольшой отступ
-                
-                // Плавная прокрутка
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }
+
+        } catch (error) {
+            console.error('Error activating tab:', error);
         }
     }
-    
-    // Обработка при загрузке и изменении URL
-    activateTabByParam();
+
+    function scrollToElement(selector) {
+        const element = document.querySelector(selector);
+        if (!element) return;
+
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 100;
+
+        const elementRect = element.getBoundingClientRect();
+        const offsetPosition = elementRect.top + window.pageYOffset - headerHeight;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    }
+
+    // Инициализация
+    setTimeout(activateTabByParam, 100);
     window.addEventListener('popstate', activateTabByParam);
-    
-    // Обработка кликов по ссылкам
-    document.addEventListener('click', function(e) {
+
+    // Обработчик кликов
+    document.addEventListener('click', function (e) {
         const link = e.target.closest('a[href*="?t="]');
         if (link) {
             const url = new URL(link.href);
             if (url.pathname === window.location.pathname) {
-                e.preventDefault(); // Предотвращаем стандартное поведение
-                history.pushState({}, '', url.href); // Меняем URL без перезагрузки
+                e.preventDefault();
+                history.pushState({}, '', url.href);
                 activateTabByParam();
             }
         }

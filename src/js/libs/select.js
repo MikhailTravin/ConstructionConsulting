@@ -1,3 +1,4 @@
+// Підключення функціоналу "Чортоги Фрілансера"
 import { isMobile, _slideUp, _slideDown, _slideToggle, FLS } from "../files/functions.js";
 import { flsModules } from "../files/modules.js";
 import { formValidate } from "../files/forms/forms.js";
@@ -77,6 +78,7 @@ class SelectConstructor {
 			classSelectCheckBox: "_select-checkbox", // Стиль чекбоксу
 			classSelectOptionSelected: "_select-selected", // Вибраний пункт
 			classSelectPseudoLabel: "_select-pseudo-label", // Псевдолейбл
+			classSelectPlaceholder: "_select-placeholder", // Клас для плейсхолдера
 		}
 		this._this = this;
 		// Запуск ініціалізації
@@ -280,6 +282,9 @@ class SelectConstructor {
 		if (selectItemTitle) selectItemTitle.remove();
 		selectItemBody.insertAdjacentHTML("afterbegin", this.getSelectTitleValue(selectItem, originalSelect));
 		originalSelect.hasAttribute('data-search') ? this.searchActions(selectItem) : null;
+
+		// Додаємо/видаляємо клас плейсхолдера
+		this.togglePlaceholderClass(selectItem, originalSelect);
 	}
 	// Конструктор значення заголовка
 	getSelectTitleValue(selectItem, originalSelect) {
@@ -549,6 +554,18 @@ class SelectConstructor {
 			}
 		}));
 	}
+	// Додаємо/видаляємо клас плейсхолдера
+	togglePlaceholderClass(selectItem, originalSelect) {
+		const selectedOptions = this.getSelectedOptionsData(originalSelect);
+		const isPlaceholderSelected = !selectedOptions.values.length ||
+			(selectedOptions.elements.length && selectedOptions.elements[0].value === '');
+
+		if (isPlaceholderSelected) {
+			selectItem.classList.add(this.selectClasses.classSelectPlaceholder);
+		} else {
+			selectItem.classList.remove(this.selectClasses.classSelectPlaceholder);
+		}
+	}
 	// Логінг у консоль
 	setLogging(message) {
 		this.config.logging ? FLS(`[select]: ${message} `) : null;
@@ -556,5 +573,3 @@ class SelectConstructor {
 }
 // Запускаємо та додаємо в об'єкт модулів
 flsModules.select = new SelectConstructor({});
-
-

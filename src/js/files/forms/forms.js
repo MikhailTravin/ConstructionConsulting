@@ -276,12 +276,46 @@ export let formValidate = {
 	}
 }
 
-// Отправка форм
-// Глобальная переменная для хранения функции отправки (временная, только для связи с капчей)
+/*
 let globalFormSubmitAction = null;
 
 export function formSubmit() {
 	const forms = document.forms;
+
+	// Добавляем обработчик для кнопок с data-docs
+	document.addEventListener('click', function (e) {
+		if (e.target.closest('[data-docs]')) {
+			const button = e.target.closest('[data-docs]');
+			const documentName = button.getAttribute('data-docs');
+			const popupId = button.getAttribute('data-popup');
+
+			// Устанавливаем значение во все скрытые поля document на странице
+			const documentInputs = document.querySelectorAll('input[name="document"]');
+			documentInputs.forEach(input => {
+				input.value = documentName;
+			});
+
+			// Если указан попап, находим в нем поле document
+			if (popupId) {
+				const popup = document.querySelector(popupId);
+				if (popup) {
+					const popupDocumentInput = popup.querySelector('input[name="document"]');
+					if (popupDocumentInput) {
+						popupDocumentInput.value = documentName;
+					}
+				}
+			}
+
+			// Обновляем тему формы если нужно
+			const themeInputs = document.querySelectorAll('input[name="theme"]');
+			themeInputs.forEach(input => {
+				if (input.value === 'Запрос на документ') {
+					input.value = `Запрос на документ: ${documentName}`;
+				}
+			});
+		}
+	});
+
 	if (forms.length) {
 		for (const form of forms) {
 			form.addEventListener('submit', function (e) {
@@ -293,15 +327,49 @@ export function formSubmit() {
 					return;
 				}
 
-				// 2. Проверка капчи только для форм с классом captcha
-				if (form.classList.contains('captcha')) {
-					const captchaContainer = form.querySelector('.g-recaptcha, .smart-captcha');
-					if (captchaContainer) {
-						// Если используется Yandex Smart Captcha
-						if (window.smartCaptcha) {
-							e.preventDefault();
+				// 2. Проверка селекта региона
+				const regionSelect = form.querySelector('select[name="region"]');
+				if (regionSelect) {
+					const selectedValue = regionSelect.value;
+					const selectTitle = form.querySelector('.select__title');
 
-							// Инициализация при первом использовании
+					if (!selectedValue) {
+						e.preventDefault();
+						// Добавляем класс ошибки к select__title
+						if (selectTitle) {
+							selectTitle.classList.add('_error');
+							// Прокручиваем к ошибке
+							selectTitle.scrollIntoView({
+								behavior: 'smooth',
+								block: 'center'
+							});
+						}
+						// Показываем сообщение об ошибке
+						showResultMessage('Пожалуйста, выберите регион', true, form);
+						return;
+					} else {
+						// Убираем класс ошибки если значение выбрано
+						if (selectTitle) {
+							selectTitle.classList.remove('_error');
+						}
+					}
+				}
+
+				// 3. Проверка капчи - ОБНОВЛЕННАЯ ВЕРСИЯ
+				const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
+				if (captchaContainer) {
+					// Показываем капчу перед проверкой
+					captchaContainer.classList.add('_visible');
+
+					// Находим input для токена внутри текущей формы
+					const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+					const captchaToken = captchaTokenInput?.value;
+
+					if (!captchaToken) {
+						e.preventDefault();
+
+						// Инициализация Smart Captcha если еще не инициализирована
+						if (typeof window.smartCaptcha !== 'undefined') {
 							if (!captchaContainer.dataset.captchaRendered) {
 								const sitekey = captchaContainer.dataset.sitekey;
 								if (!sitekey) {
@@ -310,10 +378,17 @@ export function formSubmit() {
 								}
 
 								try {
+									// Уникальный ID для контейнера капчи
+									const captchaId = 'captcha-' + Math.random().toString(36).substr(2, 9);
+									captchaContainer.id = captchaId;
+
 									window.smartCaptcha.render(captchaContainer, {
 										sitekey: sitekey,
-										invisible: true,
-										callback: onCaptchaSuccess,
+										invisible: false, // Видимая капча
+										callback: function (token) {
+											// Колбек для конкретной формы
+											onCaptchaSuccess(token, form);
+										},
 									});
 									captchaContainer.dataset.captchaRendered = 'true';
 								} catch (err) {
@@ -323,26 +398,14 @@ export function formSubmit() {
 								}
 							}
 
-							// Запускаем проверку
-							window.smartCaptcha.execute();
-							return;
-						}
-
-						// Fallback: обычная проверка токена
-						const smartTokenInput = captchaContainer.querySelector('input[name="smart-token"]');
-						const smartToken = smartTokenInput?.value;
-						const captchaTokenInput = document.getElementById('captchaToken');
-						const captchaToken = captchaTokenInput?.value;
-
-						if (!smartToken && !captchaToken) {
-							e.preventDefault();
+							// Для видимой капчи пользователь сам нажмет на кнопку
 							showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
 							highlightCaptchaError(captchaContainer);
 							return;
-						}
-
-						if (smartToken && !captchaToken) {
-							captchaTokenInput.value = smartToken;
+						} else {
+							// Библиотека не загружена
+							showResultMessage('Ошибка загрузки капчи. Обновите страницу.', true, form);
+							return;
 						}
 					}
 				}
@@ -351,23 +414,66 @@ export function formSubmit() {
 				formSubmitAction(form, e);
 			});
 
+			// Добавляем обработчик изменения селекта для снятия ошибки
+			const regionSelects = form.querySelectorAll('select[name="region"]');
+			regionSelects.forEach(select => {
+				select.addEventListener('change', function () {
+					const selectTitle = this.closest('.select').querySelector('.select__title');
+					if (selectTitle && this.value) {
+						selectTitle.classList.remove('_error');
+					}
+				});
+			});
+
+			// Также обрабатываем клики по option кнопкам кастомного селекта
+			const selectOptions = form.querySelectorAll('.select__option');
+			selectOptions.forEach(option => {
+				option.addEventListener('click', function () {
+					const select = this.closest('.select').querySelector('select[name="region"]');
+					const selectTitle = this.closest('.select').querySelector('.select__title');
+					if (select && selectTitle) {
+						selectTitle.classList.remove('_error');
+					}
+				});
+			});
+
 			form.addEventListener('reset', function (e) {
 				const form = e.target;
 				formValidate.formClean(form);
 				clearFileInputs(form);
 
-				if (form.classList.contains('captcha')) {
-					resetCaptcha();
-				}
+				// Сбрасываем ошибку селекта
+				const selectTitles = form.querySelectorAll('.select__title');
+				selectTitles.forEach(title => {
+					title.classList.remove('_error');
+				});
+
+				// Сбрасываем капчу для текущей формы
+				resetCaptcha(form);
 			});
 		}
 	}
 
-	// === ВАЖНО: Сохраняем ссылку на formSubmitAction, чтобы onCaptchaSuccess могла её вызвать ===
+	// === Сохраняем ссылку на formSubmitAction ===
 	globalFormSubmitAction = formSubmitAction;
 
 	async function formSubmitAction(form, e) {
 		e.preventDefault();
+
+		// Повторная проверка селекта перед отправкой
+		const regionSelect = form.querySelector('select[name="region"]');
+		if (regionSelect && !regionSelect.value) {
+			const selectTitle = form.querySelector('.select__title');
+			if (selectTitle) {
+				selectTitle.classList.add('_error');
+				selectTitle.scrollIntoView({
+					behavior: 'smooth',
+					block: 'center'
+				});
+			}
+			showResultMessage('Пожалуйста, выберите регион', true, form);
+			return;
+		}
 
 		const formAction = form.getAttribute('action');
 		if (!formAction || formAction.includes('.html')) {
@@ -378,11 +484,10 @@ export function formSubmit() {
 		const formMethod = form.getAttribute('method')?.toUpperCase() || 'POST';
 		const formData = new FormData(form);
 
-		if (form.classList.contains('captcha')) {
-			const captchaToken = document.getElementById('captchaToken')?.value;
-			if (captchaToken) {
-				formData.append('captcha_token', captchaToken);
-			}
+		// Добавляем токен капчи из текущей формы
+		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+		if (captchaTokenInput?.value) {
+			formData.append('captcha_token', captchaTokenInput.value);
 		}
 
 		const fileInput = form.querySelector('input[type="file"]');
@@ -420,9 +525,14 @@ export function formSubmit() {
 				form.reset();
 				clearFileInputs(form);
 
-				if (form.classList.contains('captcha')) {
-					resetCaptcha();
-				}
+				// Сбрасываем ошибку селекта при успешной отправке
+				const selectTitles = form.querySelectorAll('.select__title');
+				selectTitles.forEach(title => {
+					title.classList.remove('_error');
+				});
+
+				// Сбрасываем капчу для текущей формы
+				resetCaptcha(form);
 
 				const previewsContainer = form.querySelector('.form__previews');
 				if (previewsContainer) previewsContainer.innerHTML = '';
@@ -435,13 +545,68 @@ export function formSubmit() {
 			console.error('Ошибка отправки:', error);
 			showResultMessage(extractErrorMessage(error), true, form);
 
-			if (form.classList.contains('captcha')) {
-				resetCaptcha();
-			}
+			// Сбрасываем капчу для текущей формы при ошибке
+			resetCaptcha(form);
 		}
 	}
 
-	// Остальные функции (без изменений)
+	// Глобальная функция обратного вызова для капчи (для атрибута data-callback)
+	window.onCaptchaSuccess = function (token) {
+		console.log('Капча пройдена, токен:', token);
+
+		// Находим активную форму (форма, которая сейчас отправляется)
+		const activeForm = document.querySelector('form._sending') ||
+			document.querySelector('form:has(.g-recaptcha.smart-captcha)');
+
+		if (activeForm) {
+			// Сохраняем токен в input текущей формы
+			const captchaTokenInput = activeForm.querySelector('input[name="captcha_token"]');
+			if (captchaTokenInput) {
+				captchaTokenInput.value = token;
+			}
+
+			// Сбрасываем ошибки капчи
+			const captchaContainer = activeForm.querySelector('.g-recaptcha.smart-captcha');
+			if (captchaContainer) {
+				captchaContainer.classList.remove('_captcha-error');
+			}
+
+			// Отправляем форму
+			if (globalFormSubmitAction) {
+				const fakeEvent = {
+					preventDefault: () => { },
+					target: activeForm
+				};
+				globalFormSubmitAction(activeForm, fakeEvent);
+			}
+		} else {
+			console.error('Не удалось найти активную форму для отправки');
+		}
+	};
+
+	// Дополнительная функция для привязки к конкретной форме
+	function onCaptchaSuccess(token, form) {
+		console.log('Капча пройдена для формы:', form, 'токен:', token);
+
+		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+		if (captchaTokenInput) {
+			captchaTokenInput.value = token;
+		}
+
+		const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
+		if (captchaContainer) {
+			captchaContainer.classList.remove('_captcha-error');
+		}
+
+		if (globalFormSubmitAction) {
+			const fakeEvent = {
+				preventDefault: () => { },
+				target: form
+			};
+			globalFormSubmitAction(form, fakeEvent);
+		}
+	}
+
 	function highlightCaptchaError(captchaContainer) {
 		if (!captchaContainer) return;
 		captchaContainer.classList.add('_captcha-error');
@@ -451,13 +616,395 @@ export function formSubmit() {
 		});
 	}
 
-	function resetCaptcha() {
-		const captchaTokenInput = document.getElementById('captchaToken');
+	function resetCaptcha(form) {
+		// Сбрасываем капчу для конкретной формы
+		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
 		if (captchaTokenInput) captchaTokenInput.value = '';
 
-		const captchaContainer = document.querySelector('.g-recaptcha');
+		const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
 		if (captchaContainer) {
 			captchaContainer.classList.remove('_captcha-error');
+			// Скрываем капчу после сброса
+			captchaContainer.classList.remove('_visible');
+
+			// Сброс Yandex Smart Captcha
+			if (window.smartCaptcha && typeof window.smartCaptcha.reset === 'function') {
+				// Находим ID виджета капчи
+				const widgetId = captchaContainer.dataset.widgetId;
+				if (widgetId) {
+					window.smartCaptcha.reset(widgetId);
+				} else {
+					// Если нет widgetId, пробуем сбросить все виджеты
+					window.smartCaptcha.reset();
+				}
+			}
+		}
+	}
+
+	function clearFileInputs(form) {
+		const fileInputs = form.querySelectorAll('input[type="file"]');
+		fileInputs.forEach(input => {
+			input.value = '';
+		});
+
+		if (typeof fileList !== 'undefined') {
+			fileList.length = 0;
+		}
+	}
+
+	function formSent(form, responseResult = {}) {
+		document.dispatchEvent(new CustomEvent("formSent", {
+			detail: {
+				form: form,
+				response: responseResult
+			}
+		}));
+
+		if (responseResult.success !== false) {
+			const popupId = form.dataset.popupMessage;
+			if (popupId) {
+				if (typeof FLSModules !== 'undefined' && FLSModules.popup) {
+					FLSModules.popup.open(popupId);
+				} else if (typeof flsModules !== 'undefined' && flsModules.popup) {
+					flsModules.popup.open(popupId);
+				} else if (typeof MicroModal !== 'undefined') {
+					MicroModal.show(popupId.replace('#', ''));
+				}
+			}
+		}
+
+		if (!responseResult.redirect) {
+			formValidate.formClean(form);
+		}
+
+		formLogging('Форма отправлена!' + (responseResult.redirect ? ` Редирект на: ${responseResult.redirect}` : ''));
+	}
+
+	async function parseResponse(response) {
+		try {
+			const contentType = response.headers.get('content-type');
+			if (contentType && contentType.includes('application/json')) {
+				return await response.json();
+			}
+			const text = await response.text();
+			try {
+				return JSON.parse(text);
+			} catch {
+				return { success: false, message: text };
+			}
+		} catch (error) {
+			return { success: false, message: error.message };
+		}
+	}
+
+	function showResultMessage(message, isError, form) {
+		const resultElement = form.querySelector('.form-result');
+		if (resultElement) {
+			resultElement.textContent = message;
+			resultElement.style.display = 'block';
+			resultElement.classList.toggle('_error', isError);
+			resultElement.classList.toggle('_success', !isError);
+
+			if (!isError) {
+				setTimeout(() => {
+					resultElement.style.display = 'none';
+				}, 5000);
+			}
+		}
+	}
+
+	function extractErrorMessage(error) {
+		if (error instanceof Error) {
+			return error.message;
+		}
+		return String(error);
+	}
+
+	function formLogging(message) {
+		console.log(`[Формы]: ${message}`);
+	}
+}
+*/
+
+let globalFormSubmitAction = null;
+
+export function formSubmit() {
+	const forms = document.forms;
+
+	// Добавляем обработчик для кнопок с data-docs
+	document.addEventListener('click', function (e) {
+		if (e.target.closest('[data-docs]')) {
+			const button = e.target.closest('[data-docs]');
+			const documentName = button.getAttribute('data-docs');
+			const popupId = button.getAttribute('data-popup');
+
+			// Устанавливаем значение во все скрытые поля document на странице
+			const documentInputs = document.querySelectorAll('input[name="document"]');
+			documentInputs.forEach(input => {
+				input.value = documentName;
+			});
+
+			// Если указан попап, находим в нем поле document
+			if (popupId) {
+				const popup = document.querySelector(popupId);
+				if (popup) {
+					const popupDocumentInput = popup.querySelector('input[name="document"]');
+					if (popupDocumentInput) {
+						popupDocumentInput.value = documentName;
+					}
+				}
+			}
+
+			// Обновляем тему формы если нужно
+			const themeInputs = document.querySelectorAll('input[name="theme"]');
+			themeInputs.forEach(input => {
+				if (input.value === 'Запрос на документ') {
+					input.value = `Запрос на документ: ${documentName}`;
+				}
+			});
+		}
+	});
+
+	if (forms.length) {
+		for (const form of forms) {
+			form.addEventListener('submit', function (e) {
+				const form = e.target;
+
+				// 1. Сначала стандартная валидация полей
+				if (formValidate.getErrors(form)) {
+					e.preventDefault();
+					return;
+				}
+
+				// 2. Проверка селекта региона
+				const regionSelect = form.querySelector('select[name="region"]');
+				if (regionSelect) {
+					const selectedValue = regionSelect.value;
+					const selectTitle = form.querySelector('.select__title');
+
+					if (!selectedValue) {
+						e.preventDefault();
+						// Добавляем класс ошибки к select__title
+						if (selectTitle) {
+							selectTitle.classList.add('_error');
+							// Прокручиваем к ошибке
+							selectTitle.scrollIntoView({
+								behavior: 'smooth',
+								block: 'center'
+							});
+						}
+						// Показываем сообщение об ошибке
+						showResultMessage('Пожалуйста, выберите регион', true, form);
+						return;
+					} else {
+						// Убираем класс ошибки если значение выбрано
+						if (selectTitle) {
+							selectTitle.classList.remove('_error');
+						}
+					}
+				}
+
+				// 3. ПРОСТАЯ ПРОВЕРКА КАПЧИ
+				const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+				const captchaToken = captchaTokenInput?.value;
+
+				if (!captchaToken) {
+					e.preventDefault();
+					showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
+
+					// Подсвечиваем капчу
+					const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
+					if (captchaContainer) {
+						captchaContainer.classList.add('_captcha-error');
+						captchaContainer.scrollIntoView({
+							behavior: 'smooth',
+							block: 'center'
+						});
+					}
+					return;
+				}
+
+				// Отправляем форму напрямую
+				formSubmitAction(form, e);
+			});
+
+			// Добавляем обработчик изменения селекта для снятия ошибки
+			const regionSelects = form.querySelectorAll('select[name="region"]');
+			regionSelects.forEach(select => {
+				select.addEventListener('change', function () {
+					const selectTitle = this.closest('.select').querySelector('.select__title');
+					if (selectTitle && this.value) {
+						selectTitle.classList.remove('_error');
+					}
+				});
+			});
+
+			// Также обрабатываем клики по option кнопкам кастомного селекта
+			const selectOptions = form.querySelectorAll('.select__option');
+			selectOptions.forEach(option => {
+				option.addEventListener('click', function () {
+					const select = this.closest('.select').querySelector('select[name="region"]');
+					const selectTitle = this.closest('.select').querySelector('.select__title');
+					if (select && selectTitle) {
+						selectTitle.classList.remove('_error');
+					}
+				});
+			});
+
+			form.addEventListener('reset', function (e) {
+				const form = e.target;
+				formValidate.formClean(form);
+				clearFileInputs(form);
+
+				// Сбрасываем ошибку селекта
+				const selectTitles = form.querySelectorAll('.select__title');
+				selectTitles.forEach(title => {
+					title.classList.remove('_error');
+				});
+
+				// Сбрасываем капчу для текущей формы
+				resetCaptcha(form);
+			});
+		}
+	}
+
+	// === Сохраняем ссылку на formSubmitAction ===
+	globalFormSubmitAction = formSubmitAction;
+
+	async function formSubmitAction(form, e) {
+		e.preventDefault();
+
+		// Повторная проверка селекта перед отправкой
+		const regionSelect = form.querySelector('select[name="region"]');
+		if (regionSelect && !regionSelect.value) {
+			const selectTitle = form.querySelector('.select__title');
+			if (selectTitle) {
+				selectTitle.classList.add('_error');
+				selectTitle.scrollIntoView({
+					behavior: 'smooth',
+					block: 'center'
+				});
+			}
+			showResultMessage('Пожалуйста, выберите регион', true, form);
+			return;
+		}
+
+		// Проверка капчи перед отправкой
+		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+		if (!captchaTokenInput?.value) {
+			showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
+			return;
+		}
+
+		const formAction = form.getAttribute('action');
+		if (!formAction || formAction.includes('.html')) {
+			showResultMessage('Ошибка: указан неверный адрес отправки формы', true, form);
+			return;
+		}
+
+		const formMethod = form.getAttribute('method')?.toUpperCase() || 'POST';
+		const formData = new FormData(form);
+
+		// Добавляем токен капчи из текущей формы
+		if (captchaTokenInput.value) {
+			formData.append('captcha_token', captchaTokenInput.value);
+		}
+
+		const fileInput = form.querySelector('input[type="file"]');
+		if (fileInput?.files?.length > 0) {
+			Array.from(fileInput.files).forEach(file => {
+				formData.append(fileInput.name || 'files[]', file);
+			});
+		}
+
+		form.classList.add('_sending');
+		showResultMessage('Отправка данных...', false, form);
+
+		try {
+			const response = await fetch(formAction, {
+				method: formMethod,
+				body: formData,
+				headers: {
+					'Accept': 'application/json'
+				}
+			});
+
+			const result = await parseResponse(response);
+
+			if (!response.ok || result.success === false) {
+				throw new Error(result.message || 'Ошибка сервера');
+			}
+
+			showResultMessage(result.message || 'Форма успешно отправлена', false, form);
+
+			if (result.redirect) {
+				setTimeout(() => {
+					window.location.href = result.redirect;
+				}, 1500);
+			} else {
+				form.reset();
+				clearFileInputs(form);
+
+				// Сбрасываем ошибку селекта при успешной отправке
+				const selectTitles = form.querySelectorAll('.select__title');
+				selectTitles.forEach(title => {
+					title.classList.remove('_error');
+				});
+
+				// Сбрасываем капчу для текущей формы
+				resetCaptcha(form);
+
+				const previewsContainer = form.querySelector('.form__previews');
+				if (previewsContainer) previewsContainer.innerHTML = '';
+			}
+
+			formSent(form, result);
+
+		} catch (error) {
+			form.classList.remove('_sending');
+			console.error('Ошибка отправки:', error);
+			showResultMessage(extractErrorMessage(error), true, form);
+
+			// Сбрасываем капчу для текущей формы при ошибке
+			resetCaptcha(form);
+		}
+	}
+
+	// Глобальная функция обратного вызова для капчи
+	window.onCaptchaSuccess = function (token) {
+		console.log('Капча пройдена, токен:', token);
+
+		// Находим все формы на странице
+		const forms = document.querySelectorAll('form');
+
+		forms.forEach(form => {
+			// Сохраняем токен во всех input'ах captcha_token в форме
+			const captchaTokenInputs = form.querySelectorAll('input[name="captcha_token"]');
+			captchaTokenInputs.forEach(input => {
+				input.value = token;
+			});
+
+			// Сбрасываем ошибки капчи
+			const captchaContainers = form.querySelectorAll('.g-recaptcha.smart-captcha');
+			captchaContainers.forEach(container => {
+				container.classList.remove('_captcha-error');
+			});
+		});
+
+		// Форма будет отправлена при нажатии на кнопку Submit
+		// (убрана автоматическая отправка)
+	};
+
+	function resetCaptcha(form) {
+		// Сбрасываем капчу для конкретной формы
+		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+		if (captchaTokenInput) captchaTokenInput.value = '';
+
+		const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
+		if (captchaContainer) {
+			captchaContainer.classList.remove('_captcha-error');
+
+			// Сброс Yandex Smart Captcha
 			if (window.smartCaptcha && typeof window.smartCaptcha.reset === 'function') {
 				window.smartCaptcha.reset();
 			}
@@ -548,37 +1095,6 @@ export function formSubmit() {
 	}
 }
 
-// === Глобальная функция, вызываемая из Yandex Captcha ===
-function onCaptchaSuccess(token) {
-	const captchaTokenInput = document.getElementById('captchaToken');
-	if (captchaTokenInput) {
-		captchaTokenInput.value = token;
-	}
-
-	const captchaContainer = document.querySelector('.g-recaptcha, .smart-captcha');
-	if (captchaContainer) {
-		captchaContainer.classList.remove('_captcha-error');
-	}
-
-	const errorMessage = document.querySelector('.captcha .form-result._error');
-	if (errorMessage) {
-		errorMessage.style.display = 'none';
-	}
-
-	// Получаем форму через привязку к полю
-	const form = captchaTokenInput?.form;
-	if (form && globalFormSubmitAction) {
-		// Вызываем сохранённую функцию
-		globalFormSubmitAction(form, { preventDefault: () => { } });
-	} else {
-		console.error('formSubmitAction не доступна');
-	}
-}
-
-// Инициализация (можно оставить пустой — инициализация при submit)
-function onloadFunction() {
-	// При желании можно здесь проинициализировать капчу заранее
-}
 /* Модуль форми "кількість" */
 export function formQuantity() {
 	document.addEventListener("click", function (e) {
