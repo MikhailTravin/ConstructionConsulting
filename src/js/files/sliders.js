@@ -104,8 +104,28 @@ function initTabsSliders() {
 					1650: { slidesPerView: 7 },
 				},
 				on: {
+					init: function () {
+						checkSlidesCount(this);
+					},
+					resize: function () {
+						checkSlidesCount(this);
+					}
 				}
 			});
+
+			// Функция для проверки количества слайдов
+			function checkSlidesCount(swiperInstance) {
+				const wrapper = swiperInstance.el.querySelector('.swiper-wrapper');
+				const slides = swiperInstance.slides;
+				const currentBreakpoint = swiperInstance.currentBreakpoint;
+
+				// Изменено условие: добавляем класс когда слайдов МЕНЬШЕ 7
+				if (wrapper && slides.length < 7 && currentBreakpoint === '1650') {
+					wrapper.classList.add('_few-slides');
+				} else {
+					wrapper.classList.remove('_few-slides');
+				}
+			}
 
 			const slides = slider.querySelectorAll('.tabs__slide');
 			slides.forEach(slide => {
