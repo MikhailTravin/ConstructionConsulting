@@ -7438,8 +7438,21 @@
                             slidesPerView: 7
                         }
                     },
-                    on: {}
+                    on: {
+                        init: function() {
+                            checkSlidesCount(this);
+                        },
+                        resize: function() {
+                            checkSlidesCount(this);
+                        }
+                    }
                 });
+                function checkSlidesCount(swiperInstance) {
+                    const wrapper = swiperInstance.el.querySelector(".swiper-wrapper");
+                    const slides = swiperInstance.slides;
+                    const currentBreakpoint = swiperInstance.currentBreakpoint;
+                    if (wrapper && slides.length < 7 && "1650" === currentBreakpoint) wrapper.classList.add("_few-slides"); else wrapper.classList.remove("_few-slides");
+                }
                 const slides = slider.querySelectorAll(".tabs__slide");
                 slides.forEach((slide => {
                     slide.addEventListener("click", (function() {
