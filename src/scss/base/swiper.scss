@@ -7,7 +7,7 @@
 	box-sizing: content-box;
 	display: flex;
 	position: relative;
-	&._centered{
+	&._centered {
 		justify-content: center;
 	}
 }
@@ -34,13 +34,13 @@
 	}
 }
 .swiper-button-lock {
-	opacity: 0.5;
+	display: none;
 }
 .swiper-button-disabled {
-	opacity: 0.5;
+	display: none;
 }
 .swiper-pagination-lock {
-	opacity: 0.5;
+	display: none;
 }
 .swiper-slide-active {
 	z-index: 2;

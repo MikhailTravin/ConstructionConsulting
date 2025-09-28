@@ -287,6 +287,16 @@
     // .tabs__wrapper
 
     &__wrapper {
+        &._few-slides {
+            // Растягивание работает ТОЛЬКО на десктопе
+            @media (min-width: 1651px) {
+                .tabs__slide {
+                    flex: 1 1 calc(14.2857% - 12px) !important;
+                    width: auto !important;
+                    max-width: none !important;
+                }
+            }
+        }
     }
 
     // .tabs__slide
@@ -357,6 +367,9 @@
                 width: 13px;
             }
         }
+        ._few-slides & {
+            display: none !important;
+        }
         @media (max-width: 1200px) {
             left: -13px;
         }
@@ -374,6 +387,9 @@
             @media (max-width: 1200px) {
                 width: 13px;
             }
+        }
+        ._few-slides & {
+            display: none !important;
         }
         @media (max-width: 1200px) {
             right: -13px;
