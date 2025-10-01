@@ -1200,10 +1200,11 @@
             padding: 15px 20px;
             width: 100%;
             background-color: $white;
-            font-weight: 100;
+            font-weight: 400;
             font-size: 13px;
             color: $mainColor;
             &::placeholder {
+                font-weight: 100;
                 color: #535353;
             }
             &._form-error {
