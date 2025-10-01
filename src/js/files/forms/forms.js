@@ -275,457 +275,7 @@ export let formValidate = {
 		return !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,8})+$/.test(formRequiredItem.value);
 	}
 }
-
 /*
-let globalFormSubmitAction = null;
-
-export function formSubmit() {
-	const forms = document.forms;
-
-	// Добавляем обработчик для кнопок с data-docs
-	document.addEventListener('click', function (e) {
-		if (e.target.closest('[data-docs]')) {
-			const button = e.target.closest('[data-docs]');
-			const documentName = button.getAttribute('data-docs');
-			const popupId = button.getAttribute('data-popup');
-
-			// Устанавливаем значение во все скрытые поля document на странице
-			const documentInputs = document.querySelectorAll('input[name="document"]');
-			documentInputs.forEach(input => {
-				input.value = documentName;
-			});
-
-			// Если указан попап, находим в нем поле document
-			if (popupId) {
-				const popup = document.querySelector(popupId);
-				if (popup) {
-					const popupDocumentInput = popup.querySelector('input[name="document"]');
-					if (popupDocumentInput) {
-						popupDocumentInput.value = documentName;
-					}
-				}
-			}
-
-			// Обновляем тему формы если нужно
-			const themeInputs = document.querySelectorAll('input[name="theme"]');
-			themeInputs.forEach(input => {
-				if (input.value === 'Запрос на документ') {
-					input.value = `Запрос на документ: ${documentName}`;
-				}
-			});
-		}
-	});
-
-	if (forms.length) {
-		for (const form of forms) {
-			form.addEventListener('submit', function (e) {
-				const form = e.target;
-
-				// 1. Сначала стандартная валидация полей
-				if (formValidate.getErrors(form)) {
-					e.preventDefault();
-					return;
-				}
-
-				// 2. Проверка селекта региона
-				const regionSelect = form.querySelector('select[name="region"]');
-				if (regionSelect) {
-					const selectedValue = regionSelect.value;
-					const selectTitle = form.querySelector('.select__title');
-
-					if (!selectedValue) {
-						e.preventDefault();
-						// Добавляем класс ошибки к select__title
-						if (selectTitle) {
-							selectTitle.classList.add('_error');
-							// Прокручиваем к ошибке
-							selectTitle.scrollIntoView({
-								behavior: 'smooth',
-								block: 'center'
-							});
-						}
-						// Показываем сообщение об ошибке
-						showResultMessage('Пожалуйста, выберите регион', true, form);
-						return;
-					} else {
-						// Убираем класс ошибки если значение выбрано
-						if (selectTitle) {
-							selectTitle.classList.remove('_error');
-						}
-					}
-				}
-
-				// 3. Проверка капчи - ОБНОВЛЕННАЯ ВЕРСИЯ
-				const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
-				if (captchaContainer) {
-					// Показываем капчу перед проверкой
-					captchaContainer.classList.add('_visible');
-
-					// Находим input для токена внутри текущей формы
-					const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
-					const captchaToken = captchaTokenInput?.value;
-
-					if (!captchaToken) {
-						e.preventDefault();
-
-						// Инициализация Smart Captcha если еще не инициализирована
-						if (typeof window.smartCaptcha !== 'undefined') {
-							if (!captchaContainer.dataset.captchaRendered) {
-								const sitekey = captchaContainer.dataset.sitekey;
-								if (!sitekey) {
-									showResultMessage('Ошибка капчи: не указан data-sitekey', true, form);
-									return;
-								}
-
-								try {
-									// Уникальный ID для контейнера капчи
-									const captchaId = 'captcha-' + Math.random().toString(36).substr(2, 9);
-									captchaContainer.id = captchaId;
-
-									window.smartCaptcha.render(captchaContainer, {
-										sitekey: sitekey,
-										invisible: false, // Видимая капча
-										callback: function (token) {
-											// Колбек для конкретной формы
-											onCaptchaSuccess(token, form);
-										},
-									});
-									captchaContainer.dataset.captchaRendered = 'true';
-								} catch (err) {
-									console.error('Ошибка инициализации Yandex Smart Captcha:', err);
-									showResultMessage('Ошибка капчи. Попробуйте позже.', true, form);
-									return;
-								}
-							}
-
-							// Для видимой капчи пользователь сам нажмет на кнопку
-							showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
-							highlightCaptchaError(captchaContainer);
-							return;
-						} else {
-							// Библиотека не загружена
-							showResultMessage('Ошибка загрузки капчи. Обновите страницу.', true, form);
-							return;
-						}
-					}
-				}
-
-				// Отправляем форму напрямую
-				formSubmitAction(form, e);
-			});
-
-			// Добавляем обработчик изменения селекта для снятия ошибки
-			const regionSelects = form.querySelectorAll('select[name="region"]');
-			regionSelects.forEach(select => {
-				select.addEventListener('change', function () {
-					const selectTitle = this.closest('.select').querySelector('.select__title');
-					if (selectTitle && this.value) {
-						selectTitle.classList.remove('_error');
-					}
-				});
-			});
-
-			// Также обрабатываем клики по option кнопкам кастомного селекта
-			const selectOptions = form.querySelectorAll('.select__option');
-			selectOptions.forEach(option => {
-				option.addEventListener('click', function () {
-					const select = this.closest('.select').querySelector('select[name="region"]');
-					const selectTitle = this.closest('.select').querySelector('.select__title');
-					if (select && selectTitle) {
-						selectTitle.classList.remove('_error');
-					}
-				});
-			});
-
-			form.addEventListener('reset', function (e) {
-				const form = e.target;
-				formValidate.formClean(form);
-				clearFileInputs(form);
-
-				// Сбрасываем ошибку селекта
-				const selectTitles = form.querySelectorAll('.select__title');
-				selectTitles.forEach(title => {
-					title.classList.remove('_error');
-				});
-
-				// Сбрасываем капчу для текущей формы
-				resetCaptcha(form);
-			});
-		}
-	}
-
-	// === Сохраняем ссылку на formSubmitAction ===
-	globalFormSubmitAction = formSubmitAction;
-
-	async function formSubmitAction(form, e) {
-		e.preventDefault();
-
-		// Повторная проверка селекта перед отправкой
-		const regionSelect = form.querySelector('select[name="region"]');
-		if (regionSelect && !regionSelect.value) {
-			const selectTitle = form.querySelector('.select__title');
-			if (selectTitle) {
-				selectTitle.classList.add('_error');
-				selectTitle.scrollIntoView({
-					behavior: 'smooth',
-					block: 'center'
-				});
-			}
-			showResultMessage('Пожалуйста, выберите регион', true, form);
-			return;
-		}
-
-		const formAction = form.getAttribute('action');
-		if (!formAction || formAction.includes('.html')) {
-			showResultMessage('Ошибка: указан неверный адрес отправки формы', true, form);
-			return;
-		}
-
-		const formMethod = form.getAttribute('method')?.toUpperCase() || 'POST';
-		const formData = new FormData(form);
-
-		// Добавляем токен капчи из текущей формы
-		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
-		if (captchaTokenInput?.value) {
-			formData.append('captcha_token', captchaTokenInput.value);
-		}
-
-		const fileInput = form.querySelector('input[type="file"]');
-		if (fileInput?.files?.length > 0) {
-			Array.from(fileInput.files).forEach(file => {
-				formData.append(fileInput.name || 'files[]', file);
-			});
-		}
-
-		form.classList.add('_sending');
-		showResultMessage('Отправка данных...', false, form);
-
-		try {
-			const response = await fetch(formAction, {
-				method: formMethod,
-				body: formData,
-				headers: {
-					'Accept': 'application/json'
-				}
-			});
-
-			const result = await parseResponse(response);
-
-			if (!response.ok || result.success === false) {
-				throw new Error(result.message || 'Ошибка сервера');
-			}
-
-			showResultMessage(result.message || 'Форма успешно отправлена', false, form);
-
-			if (result.redirect) {
-				setTimeout(() => {
-					window.location.href = result.redirect;
-				}, 1500);
-			} else {
-				form.reset();
-				clearFileInputs(form);
-
-				// Сбрасываем ошибку селекта при успешной отправке
-				const selectTitles = form.querySelectorAll('.select__title');
-				selectTitles.forEach(title => {
-					title.classList.remove('_error');
-				});
-
-				// Сбрасываем капчу для текущей формы
-				resetCaptcha(form);
-
-				const previewsContainer = form.querySelector('.form__previews');
-				if (previewsContainer) previewsContainer.innerHTML = '';
-			}
-
-			formSent(form, result);
-
-		} catch (error) {
-			form.classList.remove('_sending');
-			console.error('Ошибка отправки:', error);
-			showResultMessage(extractErrorMessage(error), true, form);
-
-			// Сбрасываем капчу для текущей формы при ошибке
-			resetCaptcha(form);
-		}
-	}
-
-	// Глобальная функция обратного вызова для капчи (для атрибута data-callback)
-	window.onCaptchaSuccess = function (token) {
-		console.log('Капча пройдена, токен:', token);
-
-		// Находим активную форму (форма, которая сейчас отправляется)
-		const activeForm = document.querySelector('form._sending') ||
-			document.querySelector('form:has(.g-recaptcha.smart-captcha)');
-
-		if (activeForm) {
-			// Сохраняем токен в input текущей формы
-			const captchaTokenInput = activeForm.querySelector('input[name="captcha_token"]');
-			if (captchaTokenInput) {
-				captchaTokenInput.value = token;
-			}
-
-			// Сбрасываем ошибки капчи
-			const captchaContainer = activeForm.querySelector('.g-recaptcha.smart-captcha');
-			if (captchaContainer) {
-				captchaContainer.classList.remove('_captcha-error');
-			}
-
-			// Отправляем форму
-			if (globalFormSubmitAction) {
-				const fakeEvent = {
-					preventDefault: () => { },
-					target: activeForm
-				};
-				globalFormSubmitAction(activeForm, fakeEvent);
-			}
-		} else {
-			console.error('Не удалось найти активную форму для отправки');
-		}
-	};
-
-	// Дополнительная функция для привязки к конкретной форме
-	function onCaptchaSuccess(token, form) {
-		console.log('Капча пройдена для формы:', form, 'токен:', token);
-
-		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
-		if (captchaTokenInput) {
-			captchaTokenInput.value = token;
-		}
-
-		const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
-		if (captchaContainer) {
-			captchaContainer.classList.remove('_captcha-error');
-		}
-
-		if (globalFormSubmitAction) {
-			const fakeEvent = {
-				preventDefault: () => { },
-				target: form
-			};
-			globalFormSubmitAction(form, fakeEvent);
-		}
-	}
-
-	function highlightCaptchaError(captchaContainer) {
-		if (!captchaContainer) return;
-		captchaContainer.classList.add('_captcha-error');
-		captchaContainer.scrollIntoView({
-			behavior: 'smooth',
-			block: 'center'
-		});
-	}
-
-	function resetCaptcha(form) {
-		// Сбрасываем капчу для конкретной формы
-		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
-		if (captchaTokenInput) captchaTokenInput.value = '';
-
-		const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
-		if (captchaContainer) {
-			captchaContainer.classList.remove('_captcha-error');
-			// Скрываем капчу после сброса
-			captchaContainer.classList.remove('_visible');
-
-			// Сброс Yandex Smart Captcha
-			if (window.smartCaptcha && typeof window.smartCaptcha.reset === 'function') {
-				// Находим ID виджета капчи
-				const widgetId = captchaContainer.dataset.widgetId;
-				if (widgetId) {
-					window.smartCaptcha.reset(widgetId);
-				} else {
-					// Если нет widgetId, пробуем сбросить все виджеты
-					window.smartCaptcha.reset();
-				}
-			}
-		}
-	}
-
-	function clearFileInputs(form) {
-		const fileInputs = form.querySelectorAll('input[type="file"]');
-		fileInputs.forEach(input => {
-			input.value = '';
-		});
-
-		if (typeof fileList !== 'undefined') {
-			fileList.length = 0;
-		}
-	}
-
-	function formSent(form, responseResult = {}) {
-		document.dispatchEvent(new CustomEvent("formSent", {
-			detail: {
-				form: form,
-				response: responseResult
-			}
-		}));
-
-		if (responseResult.success !== false) {
-			const popupId = form.dataset.popupMessage;
-			if (popupId) {
-				if (typeof FLSModules !== 'undefined' && FLSModules.popup) {
-					FLSModules.popup.open(popupId);
-				} else if (typeof flsModules !== 'undefined' && flsModules.popup) {
-					flsModules.popup.open(popupId);
-				} else if (typeof MicroModal !== 'undefined') {
-					MicroModal.show(popupId.replace('#', ''));
-				}
-			}
-		}
-
-		if (!responseResult.redirect) {
-			formValidate.formClean(form);
-		}
-
-		formLogging('Форма отправлена!' + (responseResult.redirect ? ` Редирект на: ${responseResult.redirect}` : ''));
-	}
-
-	async function parseResponse(response) {
-		try {
-			const contentType = response.headers.get('content-type');
-			if (contentType && contentType.includes('application/json')) {
-				return await response.json();
-			}
-			const text = await response.text();
-			try {
-				return JSON.parse(text);
-			} catch {
-				return { success: false, message: text };
-			}
-		} catch (error) {
-			return { success: false, message: error.message };
-		}
-	}
-
-	function showResultMessage(message, isError, form) {
-		const resultElement = form.querySelector('.form-result');
-		if (resultElement) {
-			resultElement.textContent = message;
-			resultElement.style.display = 'block';
-			resultElement.classList.toggle('_error', isError);
-			resultElement.classList.toggle('_success', !isError);
-
-			if (!isError) {
-				setTimeout(() => {
-					resultElement.style.display = 'none';
-				}, 5000);
-			}
-		}
-	}
-
-	function extractErrorMessage(error) {
-		if (error instanceof Error) {
-			return error.message;
-		}
-		return String(error);
-	}
-
-	function formLogging(message) {
-		console.log(`[Формы]: ${message}`);
-	}
-}
-*/
-
 let globalFormSubmitAction = null;
 
 export function formSubmit() {
@@ -1020,6 +570,494 @@ export function formSubmit() {
 		if (typeof fileList !== 'undefined') {
 			fileList.length = 0;
 		}
+	}
+
+	function formSent(form, responseResult = {}) {
+		document.dispatchEvent(new CustomEvent("formSent", {
+			detail: {
+				form: form,
+				response: responseResult
+			}
+		}));
+
+		if (responseResult.success !== false) {
+			const popupId = form.dataset.popupMessage;
+			if (popupId) {
+				if (typeof FLSModules !== 'undefined' && FLSModules.popup) {
+					FLSModules.popup.open(popupId);
+				} else if (typeof flsModules !== 'undefined' && flsModules.popup) {
+					flsModules.popup.open(popupId);
+				} else if (typeof MicroModal !== 'undefined') {
+					MicroModal.show(popupId.replace('#', ''));
+				}
+			}
+		}
+
+		if (!responseResult.redirect) {
+			formValidate.formClean(form);
+		}
+
+		formLogging('Форма отправлена!' + (responseResult.redirect ? ` Редирект на: ${responseResult.redirect}` : ''));
+	}
+
+	async function parseResponse(response) {
+		try {
+			const contentType = response.headers.get('content-type');
+			if (contentType && contentType.includes('application/json')) {
+				return await response.json();
+			}
+			const text = await response.text();
+			try {
+				return JSON.parse(text);
+			} catch {
+				return { success: false, message: text };
+			}
+		} catch (error) {
+			return { success: false, message: error.message };
+		}
+	}
+
+	function showResultMessage(message, isError, form) {
+		const resultElement = form.querySelector('.form-result');
+		if (resultElement) {
+			resultElement.textContent = message;
+			resultElement.style.display = 'block';
+			resultElement.classList.toggle('_error', isError);
+			resultElement.classList.toggle('_success', !isError);
+
+			if (!isError) {
+				setTimeout(() => {
+					resultElement.style.display = 'none';
+				}, 5000);
+			}
+		}
+	}
+
+	function extractErrorMessage(error) {
+		if (error instanceof Error) {
+			return error.message;
+		}
+		return String(error);
+	}
+
+	function formLogging(message) {
+		console.log(`[Формы]: ${message}`);
+	}
+}
+*/
+
+let globalFormSubmitAction = null;
+
+export function formSubmit() {
+	const forms = document.forms;
+
+	// Инициализация обработки файлов для всех форм
+	initFileHandlers();
+
+	// Добавляем обработчик для кнопок с data-docs
+	document.addEventListener('click', function (e) {
+		if (e.target.closest('[data-docs]')) {
+			const button = e.target.closest('[data-docs]');
+			const documentName = button.getAttribute('data-docs');
+			const popupId = button.getAttribute('data-popup');
+
+			// Устанавливаем значение во все скрытые поля document на странице
+			const documentInputs = document.querySelectorAll('input[name="document"]');
+			documentInputs.forEach(input => {
+				input.value = documentName;
+			});
+
+			// Если указан попап, находим в нем поле document
+			if (popupId) {
+				const popup = document.querySelector(popupId);
+				if (popup) {
+					const popupDocumentInput = popup.querySelector('input[name="document"]');
+					if (popupDocumentInput) {
+						popupDocumentInput.value = documentName;
+					}
+				}
+			}
+
+			// Обновляем тему формы если нужно
+			const themeInputs = document.querySelectorAll('input[name="theme"]');
+			themeInputs.forEach(input => {
+				if (input.value === 'Запрос на документ') {
+					input.value = `Запрос на документ: ${documentName}`;
+				}
+			});
+		}
+	});
+
+	if (forms.length) {
+		for (const form of forms) {
+			form.addEventListener('submit', function (e) {
+				const form = e.target;
+
+				// 1. Сначала стандартная валидация полей
+				if (formValidate.getErrors(form)) {
+					e.preventDefault();
+					return;
+				}
+
+				// 2. Проверка селекта региона
+				const regionSelect = form.querySelector('select[name="region"]');
+				if (regionSelect) {
+					const selectedValue = regionSelect.value;
+					const selectTitle = form.querySelector('.select__title');
+
+					if (!selectedValue) {
+						e.preventDefault();
+						// Добавляем класс ошибки к select__title
+						if (selectTitle) {
+							selectTitle.classList.add('_error');
+							// Прокручиваем к ошибке
+							selectTitle.scrollIntoView({
+								behavior: 'smooth',
+								block: 'center'
+							});
+						}
+						// Показываем сообщение об ошибке
+						showResultMessage('Пожалуйста, выберите регион', true, form);
+						return;
+					} else {
+						// Убираем класс ошибки если значение выбрано
+						if (selectTitle) {
+							selectTitle.classList.remove('_error');
+						}
+					}
+				}
+
+				// 3. ПРОВЕРКА КАПЧИ (ТОЛЬКО ЕСЛИ ЕСТЬ В ФОРМЕ)
+				const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+				if (captchaTokenInput) { // Проверяем, есть ли капча в форме
+					const captchaToken = captchaTokenInput.value;
+
+					if (!captchaToken) {
+						e.preventDefault();
+						showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
+
+						// Подсвечиваем капчу
+						const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
+						if (captchaContainer) {
+							captchaContainer.classList.add('_captcha-error');
+							captchaContainer.scrollIntoView({
+								behavior: 'smooth',
+								block: 'center'
+							});
+						}
+						return;
+					}
+				}
+
+				// Отправляем форму напрямую
+				formSubmitAction(form, e);
+			});
+
+			// Добавляем обработчик изменения селекта для снятия ошибки
+			const regionSelects = form.querySelectorAll('select[name="region"]');
+			regionSelects.forEach(select => {
+				select.addEventListener('change', function () {
+					const selectTitle = this.closest('.select').querySelector('.select__title');
+					if (selectTitle && this.value) {
+						selectTitle.classList.remove('_error');
+					}
+				});
+			});
+
+			// Также обрабатываем клики по option кнопкам кастомного селекта
+			const selectOptions = form.querySelectorAll('.select__option');
+			selectOptions.forEach(option => {
+				option.addEventListener('click', function () {
+					const select = this.closest('.select').querySelector('select[name="region"]');
+					const selectTitle = this.closest('.select').querySelector('.select__title');
+					if (select && selectTitle) {
+						selectTitle.classList.remove('_error');
+					}
+				});
+			});
+
+			form.addEventListener('reset', function (e) {
+				const form = e.target;
+				formValidate.formClean(form);
+				clearFileInputs(form);
+
+				// Сбрасываем ошибку селекта
+				const selectTitles = form.querySelectorAll('.select__title');
+				selectTitles.forEach(title => {
+					title.classList.remove('_error');
+				});
+
+				// Сбрасываем капчу для текущей формы
+				resetCaptcha(form);
+			});
+		}
+	}
+
+	// === Сохраняем ссылку на formSubmitAction ===
+	globalFormSubmitAction = formSubmitAction;
+
+	async function formSubmitAction(form, e) {
+		e.preventDefault();
+
+		// Повторная проверка селекта перед отправкой
+		const regionSelect = form.querySelector('select[name="region"]');
+		if (regionSelect && !regionSelect.value) {
+			const selectTitle = form.querySelector('.select__title');
+			if (selectTitle) {
+				selectTitle.classList.add('_error');
+				selectTitle.scrollIntoView({
+					behavior: 'smooth',
+					block: 'center'
+				});
+			}
+			showResultMessage('Пожалуйста, выберите регион', true, form);
+			return;
+		}
+
+		// Проверка капчи перед отправкой (ТОЛЬКО ЕСЛИ ЕСТЬ В ФОРМЕ)
+		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+		if (captchaTokenInput && !captchaTokenInput.value) {
+			showResultMessage('Пожалуйста, пройдите проверку на робота', true, form);
+			return;
+		}
+
+		const formAction = form.getAttribute('action');
+		if (!formAction || formAction.includes('.html')) {
+			showResultMessage('Ошибка: указан неверный адрес отправки формы', true, form);
+			return;
+		}
+
+		const formMethod = form.getAttribute('method')?.toUpperCase() || 'POST';
+		const formData = new FormData(form);
+
+		// Добавляем токен капчи из текущей формы (только если есть)
+		if (captchaTokenInput && captchaTokenInput.value) {
+			formData.append('captcha_token', captchaTokenInput.value);
+		}
+
+		// Добавляем файлы из всех file inputs
+		const fileInputs = form.querySelectorAll('input[type="file"]');
+		fileInputs.forEach(fileInput => {
+			if (fileInput?.files?.length > 0) {
+				Array.from(fileInput.files).forEach(file => {
+					formData.append(fileInput.name || 'files[]', file);
+				});
+			}
+		});
+
+		form.classList.add('_sending');
+		showResultMessage('Отправка данных...', false, form);
+
+		try {
+			const response = await fetch(formAction, {
+				method: formMethod,
+				body: formData,
+				headers: {
+					'Accept': 'application/json'
+				}
+			});
+
+			const result = await parseResponse(response);
+
+			if (!response.ok || result.success === false) {
+				throw new Error(result.message || 'Ошибка сервера');
+			}
+
+			showResultMessage(result.message || 'Форма успешно отправлена', false, form);
+
+			if (result.redirect) {
+				setTimeout(() => {
+					window.location.href = result.redirect;
+				}, 1500);
+			} else {
+				form.reset();
+				clearFileInputs(form);
+
+				// Сбрасываем ошибку селекта при успешной отправке
+				const selectTitles = form.querySelectorAll('.select__title');
+				selectTitles.forEach(title => {
+					title.classList.remove('_error');
+				});
+
+				// Сбрасываем капчу для текущей формы
+				resetCaptcha(form);
+
+				// Очищаем превью файлов
+				const previewsContainers = form.querySelectorAll('.form__previews');
+				previewsContainers.forEach(container => {
+					container.innerHTML = '';
+					container.style.display = 'none';
+				});
+			}
+
+			formSent(form, result);
+
+		} catch (error) {
+			form.classList.remove('_sending');
+			console.error('Ошибка отправки:', error);
+			showResultMessage(extractErrorMessage(error), true, form);
+
+			// Сбрасываем капчу для текущей формы при ошибке
+			resetCaptcha(form);
+		}
+	}
+
+	// Функция инициализации обработчиков файлов
+	function initFileHandlers() {
+		document.querySelectorAll('.form__file input[type="file"]').forEach(input => {
+			let fileList = []; // Храним File объекты для каждого инпута
+
+			// Ищем контейнер для превью в любой части формы
+			let previewContainer = findPreviewContainer(input);
+
+			if (!previewContainer) {
+				console.warn('Не найден .form__previews для input', input);
+				return;
+			}
+
+			console.log('Найден контейнер для превью:', previewContainer);
+
+			input.addEventListener('change', function () {
+				// Добавляем новые файлы
+				for (let i = 0; i < this.files.length; i++) {
+					if (!fileList.some(f => f.name === this.files[i].name && f.size === this.files[i].size)) {
+						fileList.push(this.files[i]);
+					}
+				}
+				updatePreview();
+				updateFileInput();
+			});
+
+			function updatePreview() {
+				previewContainer.innerHTML = '';
+				if (fileList.length === 0) {
+					previewContainer.style.display = 'none';
+					return;
+				}
+
+				previewContainer.style.display = 'block';
+
+				fileList.forEach((file, index) => {
+					const item = document.createElement('div');
+					item.classList.add('form__preview');
+
+					const fileName = document.createElement('span');
+					fileName.textContent = file.name;
+					fileName.classList.add('file-name');
+
+					const remove = document.createElement('div');
+					remove.classList.add('form__preview-close');
+
+					remove.addEventListener('click', (e) => {
+						e.stopPropagation();
+						fileList.splice(index, 1);
+						updateFileInput();
+						updatePreview();
+					});
+
+					item.appendChild(fileName);
+					item.appendChild(remove);
+					previewContainer.appendChild(item);
+				});
+			}
+
+			function updateFileInput() {
+				const dataTransfer = new DataTransfer();
+				fileList.forEach(file => dataTransfer.items.add(file));
+				input.files = dataTransfer.files;
+
+				// Триггерим событие change для обновления формы
+				input.dispatchEvent(new Event('change', { bubbles: true }));
+			}
+
+			// Инициализация существующих превью
+			updatePreview();
+		});
+	}
+
+	function findPreviewContainer(input) {
+		// Ищем контейнер в той же форме, где находится input
+		const form = input.closest('form');
+		if (!form) {
+			console.warn('Input не находится внутри формы:', input);
+			return null;
+		}
+
+		// Ищем любой .form__previews внутри формы
+		const previewContainer = form.querySelector('.form__previews');
+		if (previewContainer) {
+			return previewContainer;
+		}
+
+		// Если контейнер не найден, создаем его
+		console.log('Создаем новый контейнер .form__previews');
+		const newContainer = document.createElement('div');
+		newContainer.className = 'form__previews';
+		newContainer.style.display = 'none';
+
+		// Размещаем контейнер в логическом месте - после .form__file или в конце формы
+		const formFile = input.closest('.form__file');
+		if (formFile && formFile.parentNode) {
+			formFile.parentNode.insertBefore(newContainer, formFile.nextSibling);
+		} else {
+			form.appendChild(newContainer);
+		}
+
+		return newContainer;
+	}
+
+	// Глобальная функция обратного вызова для капчи
+	window.onCaptchaSuccess = function (token) {
+		console.log('Капча пройдена, токен:', token);
+
+		// Находим все формы на странице
+		const forms = document.querySelectorAll('form');
+
+		forms.forEach(form => {
+			// Сохраняем токен во всех input'ах captcha_token в форме
+			const captchaTokenInputs = form.querySelectorAll('input[name="captcha_token"]');
+			captchaTokenInputs.forEach(input => {
+				input.value = token;
+			});
+
+			// Сбрасываем ошибки капчи
+			const captchaContainers = form.querySelectorAll('.g-recaptcha.smart-captcha');
+			captchaContainers.forEach(container => {
+				container.classList.remove('_captcha-error');
+			});
+		});
+	};
+
+	function resetCaptcha(form) {
+		// Сбрасываем капчу для конкретной формы (только если есть)
+		const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
+		if (captchaTokenInput) {
+			captchaTokenInput.value = '';
+
+			const captchaContainer = form.querySelector('.g-recaptcha.smart-captcha');
+			if (captchaContainer) {
+				captchaContainer.classList.remove('_captcha-error');
+
+				// Сброс Yandex Smart Captcha
+				if (window.smartCaptcha && typeof window.smartCaptcha.reset === 'function') {
+					window.smartCaptcha.reset();
+				}
+			}
+		}
+	}
+
+	function clearFileInputs(form) {
+		const fileInputs = form.querySelectorAll('input[type="file"]');
+		fileInputs.forEach(input => {
+			input.value = '';
+		});
+
+		// Также очищаем все контейнеры превью
+		const previewsContainers = form.querySelectorAll('.form__previews');
+		previewsContainers.forEach(container => {
+			container.innerHTML = '';
+			container.style.display = 'none';
+		});
 	}
 
 	function formSent(form, responseResult = {}) {

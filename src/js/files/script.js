@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 //========================================================================================================================================================
-
+/*
 //Прикрепить фото
 document.querySelectorAll('.form__file input[type="file"]').forEach(input => {
     let fileList = []; // Храним File объекты для каждого инпута
@@ -179,6 +179,7 @@ document.querySelectorAll('.form__file input[type="file"]').forEach(input => {
         previewContainer.style.display = 'none';
     }
 });
+*/
 
 //========================================================================================================================================================
 
