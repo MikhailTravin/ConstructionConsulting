@@ -3847,6 +3847,7 @@
         let globalFormSubmitAction = null;
         function formSubmit() {
             const forms = document.forms;
+            initFileHandlers();
             document.addEventListener("click", (function(e) {
                 if (e.target.closest("[data-docs]")) {
                     const button = e.target.closest("[data-docs]");
@@ -3894,19 +3895,21 @@
                         } else if (selectTitle) selectTitle.classList.remove("_error");
                     }
                     const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
-                    const captchaToken = captchaTokenInput?.value;
-                    if (!captchaToken) {
-                        e.preventDefault();
-                        showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
-                        const captchaContainer = form.querySelector(".g-recaptcha.smart-captcha");
-                        if (captchaContainer) {
-                            captchaContainer.classList.add("_captcha-error");
-                            captchaContainer.scrollIntoView({
-                                behavior: "smooth",
-                                block: "center"
-                            });
+                    if (captchaTokenInput) {
+                        const captchaToken = captchaTokenInput.value;
+                        if (!captchaToken) {
+                            e.preventDefault();
+                            showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
+                            const captchaContainer = form.querySelector(".g-recaptcha.smart-captcha");
+                            if (captchaContainer) {
+                                captchaContainer.classList.add("_captcha-error");
+                                captchaContainer.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center"
+                                });
+                            }
+                            return;
                         }
-                        return;
                     }
                     formSubmitAction(form, e);
                 }));
@@ -3953,7 +3956,7 @@
                     return;
                 }
                 const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
-                if (!captchaTokenInput?.value) {
+                if (captchaTokenInput && !captchaTokenInput.value) {
                     showResultMessage("Пожалуйста, пройдите проверку на робота", true, form);
                     return;
                 }
@@ -3964,10 +3967,12 @@
                 }
                 const formMethod = form.getAttribute("method")?.toUpperCase() || "POST";
                 const formData = new FormData(form);
-                if (captchaTokenInput.value) formData.append("captcha_token", captchaTokenInput.value);
-                const fileInput = form.querySelector('input[type="file"]');
-                if (fileInput?.files?.length > 0) Array.from(fileInput.files).forEach((file => {
-                    formData.append(fileInput.name || "files[]", file);
+                if (captchaTokenInput && captchaTokenInput.value) formData.append("captcha_token", captchaTokenInput.value);
+                const fileInputs = form.querySelectorAll('input[type="file"]');
+                fileInputs.forEach((fileInput => {
+                    if (fileInput?.files?.length > 0) Array.from(fileInput.files).forEach((file => {
+                        formData.append(fileInput.name || "files[]", file);
+                    }));
                 }));
                 form.classList.add("_sending");
                 showResultMessage("Отправка данных...", false, form);
@@ -3992,8 +3997,11 @@
                             title.classList.remove("_error");
                         }));
                         resetCaptcha(form);
-                        const previewsContainer = form.querySelector(".form__previews");
-                        if (previewsContainer) previewsContainer.innerHTML = "";
+                        const previewsContainers = form.querySelectorAll(".form__previews");
+                        previewsContainers.forEach((container => {
+                            container.innerHTML = "";
+                            container.style.display = "none";
+                        }));
                     }
                     formSent(form, result);
                 } catch (error) {
@@ -4002,6 +4010,73 @@
                     showResultMessage(extractErrorMessage(error), true, form);
                     resetCaptcha(form);
                 }
+            }
+            function initFileHandlers() {
+                document.querySelectorAll('.form__file input[type="file"]').forEach((input => {
+                    let fileList = [];
+                    let previewContainer = findPreviewContainer(input);
+                    if (!previewContainer) {
+                        console.warn("Не найден .form__previews для input", input);
+                        return;
+                    }
+                    console.log("Найден контейнер для превью:", previewContainer);
+                    input.addEventListener("change", (function() {
+                        for (let i = 0; i < this.files.length; i++) if (!fileList.some((f => f.name === this.files[i].name && f.size === this.files[i].size))) fileList.push(this.files[i]);
+                        updatePreview();
+                        updateFileInput();
+                    }));
+                    function updatePreview() {
+                        previewContainer.innerHTML = "";
+                        if (0 === fileList.length) {
+                            previewContainer.style.display = "none";
+                            return;
+                        }
+                        previewContainer.style.display = "block";
+                        fileList.forEach(((file, index) => {
+                            const item = document.createElement("div");
+                            item.classList.add("form__preview");
+                            const fileName = document.createElement("span");
+                            fileName.textContent = file.name;
+                            fileName.classList.add("file-name");
+                            const remove = document.createElement("div");
+                            remove.classList.add("form__preview-close");
+                            remove.addEventListener("click", (e => {
+                                e.stopPropagation();
+                                fileList.splice(index, 1);
+                                updateFileInput();
+                                updatePreview();
+                            }));
+                            item.appendChild(fileName);
+                            item.appendChild(remove);
+                            previewContainer.appendChild(item);
+                        }));
+                    }
+                    function updateFileInput() {
+                        const dataTransfer = new DataTransfer;
+                        fileList.forEach((file => dataTransfer.items.add(file)));
+                        input.files = dataTransfer.files;
+                        input.dispatchEvent(new Event("change", {
+                            bubbles: true
+                        }));
+                    }
+                    updatePreview();
+                }));
+            }
+            function findPreviewContainer(input) {
+                const form = input.closest("form");
+                if (!form) {
+                    console.warn("Input не находится внутри формы:", input);
+                    return null;
+                }
+                const previewContainer = form.querySelector(".form__previews");
+                if (previewContainer) return previewContainer;
+                console.log("Создаем новый контейнер .form__previews");
+                const newContainer = document.createElement("div");
+                newContainer.className = "form__previews";
+                newContainer.style.display = "none";
+                const formFile = input.closest(".form__file");
+                if (formFile && formFile.parentNode) formFile.parentNode.insertBefore(newContainer, formFile.nextSibling); else form.appendChild(newContainer);
+                return newContainer;
             }
             window.onCaptchaSuccess = function(token) {
                 console.log("Капча пройдена, токен:", token);
@@ -4019,11 +4094,13 @@
             };
             function resetCaptcha(form) {
                 const captchaTokenInput = form.querySelector('input[name="captcha_token"]');
-                if (captchaTokenInput) captchaTokenInput.value = "";
-                const captchaContainer = form.querySelector(".g-recaptcha.smart-captcha");
-                if (captchaContainer) {
-                    captchaContainer.classList.remove("_captcha-error");
-                    if (window.smartCaptcha && "function" === typeof window.smartCaptcha.reset) window.smartCaptcha.reset();
+                if (captchaTokenInput) {
+                    captchaTokenInput.value = "";
+                    const captchaContainer = form.querySelector(".g-recaptcha.smart-captcha");
+                    if (captchaContainer) {
+                        captchaContainer.classList.remove("_captcha-error");
+                        if (window.smartCaptcha && "function" === typeof window.smartCaptcha.reset) window.smartCaptcha.reset();
+                    }
                 }
             }
             function clearFileInputs(form) {
@@ -4031,7 +4108,11 @@
                 fileInputs.forEach((input => {
                     input.value = "";
                 }));
-                if ("undefined" !== typeof fileList) fileList.length = 0;
+                const previewsContainers = form.querySelectorAll(".form__previews");
+                previewsContainers.forEach((container => {
+                    container.innerHTML = "";
+                    container.style.display = "none";
+                }));
             }
             function formSent(form, responseResult = {}) {
                 document.dispatchEvent(new CustomEvent("formSent", {
@@ -9404,62 +9485,6 @@ PERFORMANCE OF THIS SOFTWARE.
         }));
         document.addEventListener("DOMContentLoaded", (() => {
             indents();
-        }));
-        document.querySelectorAll('.form__file input[type="file"]').forEach((input => {
-            let fileList = [];
-            let previewContainer = null;
-            const formPopupInputs = input.closest(".form-popup__inputs");
-            if (formPopupInputs) previewContainer = formPopupInputs.querySelector(".form__previews");
-            if (!previewContainer) {
-                const formBottom = input.closest(".form__bottom");
-                if (formBottom) previewContainer = formBottom.querySelector(".form__previews");
-            }
-            if (!previewContainer) {
-                const parent = input.closest(".form__file").parentElement;
-                previewContainer = parent.querySelector(".form__previews");
-            }
-            if (!previewContainer) {
-                console.warn("Не найден .form__previews для input", input);
-                return;
-            }
-            input.addEventListener("change", (function() {
-                for (let i = 0; i < this.files.length; i++) if (!fileList.some((f => f.name === this.files[i].name && f.size === this.files[i].size))) fileList.push(this.files[i]);
-                updatePreview();
-                updateFileInput();
-            }));
-            function updatePreview() {
-                previewContainer.innerHTML = "";
-                if (0 === fileList.length) {
-                    previewContainer.style.display = "none";
-                    return;
-                }
-                previewContainer.style.display = "block";
-                fileList.forEach(((file, index) => {
-                    const item = document.createElement("div");
-                    item.classList.add("form__preview");
-                    const fileName = document.createElement("span");
-                    fileName.textContent = file.name;
-                    fileName.classList.add("file-name");
-                    const remove = document.createElement("div");
-                    remove.classList.add("form__preview-close");
-                    remove.addEventListener("click", (e => {
-                        e.stopPropagation();
-                        fileList.splice(index, 1);
-                        updateFileInput();
-                        updatePreview();
-                    }));
-                    item.appendChild(remove);
-                    item.appendChild(fileName);
-                    previewContainer.appendChild(item);
-                }));
-            }
-            function updateFileInput() {
-                const dataTransfer = new DataTransfer;
-                fileList.forEach((file => dataTransfer.items.add(file)));
-                input.files = dataTransfer.files;
-            }
-            const existingPreviews = previewContainer.querySelectorAll(".form__preview");
-            if (existingPreviews.length > 0) previewContainer.style.display = "block"; else previewContainer.style.display = "none";
         }));
         const inputContainer = document.querySelector(".bottom-header__input");
         if (inputContainer) {
