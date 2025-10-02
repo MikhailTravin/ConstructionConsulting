@@ -4151,7 +4151,6 @@
             function showResultMessage(message, isError, form) {
                 const resultElement = form.querySelector(".form-result");
                 if (resultElement) {
-                    resultElement.textContent = message;
                     resultElement.style.display = "block";
                     resultElement.classList.toggle("_error", isError);
                     resultElement.classList.toggle("_success", !isError);
