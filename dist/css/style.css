@@ -2763,6 +2763,11 @@ h2 {
   padding: 55px 0px 40px 0px;
 }
 
+.forms .form__error-container {
+  width: 100%;
+  margin: -12px 0px 10px 0px;
+}
+
 .forms__bg {
   position: absolute;
   top: 0;
