@@ -306,3 +306,44 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+const titles = document.querySelectorAll('.installation-stage__title');
+const columns = document.querySelectorAll('.installation-stage__column');
+
+// На мобильных устройствах активируем первую колонку
+if (window.innerWidth <= 992) {
+    columns[0].classList.add('installation-stage__column_active');
+}
+
+// Обработчик клика на заголовок
+titles.forEach(title => {
+    title.addEventListener('click', function () {
+        const column = this.closest('.installation-stage__column');
+
+        // Если на мобильных - закрываем все кроме текущего
+        if (window.innerWidth <= 992) {
+            columns.forEach(col => {
+                if (col !== column) {
+                    col.classList.remove('installation-stage__column_active');
+                }
+            });
+        }
+
+        // Переключаем текущую колонку
+        column.classList.toggle('installation-stage__column_active');
+    });
+});
+
+// Обработчик изменения размера окна
+window.addEventListener('resize', function () {
+    if (window.innerWidth <= 992) {
+        // На мобильных - активируем первую колонку если ни одна не активна
+        const activeColumn = document.querySelector('.installation-stage__column_active');
+        if (!activeColumn) {
+            columns[0].classList.add('installation-stage__column_active');
+        }
+    } else {
+        // На десктопе - убираем принудительную активацию первой колонки
+        columns[0].classList.remove('installation-stage__column_active');
+    }
+});
