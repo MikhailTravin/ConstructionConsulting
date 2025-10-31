@@ -135,15 +135,19 @@
                 border: none;
             }
         }
+        @media (max-width: 992px) {
+            width: 100%;
+        }
     }
 }
 
 .services-tabs {
     margin: 98px 0px 0px 0px;
     display: flex;
+    flex-wrap: wrap;
     gap: 20px;
     @media (max-width: $tablet) {
-        margin: 30px 0px 0px 0px;
+        margin: 30px 0px 30px 0px;
     }
     &.services-float {
         overflow: hidden;
@@ -169,6 +173,10 @@
         @media (max-width: $mobile) {
             margin: 20px auto;
             max-width: 100%;
+        }
+        img {
+            width: 100%;
+            height: auto;
         }
     }
 
@@ -447,6 +455,17 @@
             border-left: 10px solid transparent;
             border-right: 10px solid transparent;
             border-top: 17px solid #e50707;
+            @media (max-width: 992px) {
+                display: none;
+            }
+        }
+        &.installation-stage__column_active {
+            span {
+                display: block;
+            }
+            .installation-stage__subtitle {
+                display: flex;
+            }
         }
     }
 
@@ -479,6 +498,9 @@
         color: #4b4b4b;
         font-weight: 300;
         width: 100%;
+        @media (max-width: 992px) {
+            display: none;
+        }
     }
 }
 
