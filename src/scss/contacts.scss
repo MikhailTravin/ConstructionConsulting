@@ -74,6 +74,9 @@
         @media (max-width: $mobile) {
             margin: -20px;
         }
+        @media (max-width: 500px) {
+            flex-direction: column;
+        }
     }
 
     // .workers__column
@@ -84,6 +87,9 @@
         @media (max-width: $mobile) {
             padding: 20px;
             flex: 1 1 33.3333%;
+        }
+        @media (max-width: 500px) {
+            flex: 1 1 auto;
         }
     }
 
@@ -142,8 +148,8 @@
 
 .map {
     padding: 45px 0px 25px 0px;
-    @media (max-width:$mobile){
-         padding: 15px 0px; 
+    @media (max-width: $mobile) {
+        padding: 15px 0px;
     }
     // .map__container
 
