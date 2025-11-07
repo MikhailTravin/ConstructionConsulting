@@ -3343,8 +3343,23 @@
                         tabActiveTitle.length ? tabActiveTitle[0].classList.remove("_tab-active") : null;
                         tabTitle.classList.add("_tab-active");
                         setTabsStatus(tabsBlock);
+                        if (tabsBlock.classList.contains("_tab-spoller")) {
+                            function getTabsAnimate(tabsBlock) {
+                                if (tabsBlock.hasAttribute("data-tabs-animate")) return tabsBlock.dataset.tabsAnimate > 0 ? Number(tabsBlock.dataset.tabsAnimate) : 500;
+                                return 0;
+                            }
+                            const currentTabsAnimate = getTabsAnimate(tabsBlock);
+                            setTimeout((() => {
+                                const header = document.querySelector("header");
+                                const headerHeight = header ? header.offsetHeight : 0;
+                                const elementTop = tabTitle.getBoundingClientRect().top + window.pageYOffset;
+                                window.scrollTo({
+                                    top: elementTop - headerHeight - 20,
+                                    behavior: "smooth"
+                                });
+                            }), currentTabsAnimate + 50);
+                        }
                     }
-                    e.preventDefault();
                 }
             }
         }
@@ -9630,21 +9645,30 @@ PERFORMANCE OF THIS SOFTWARE.
         }));
         const titles = document.querySelectorAll(".installation-stage__title");
         const columns = document.querySelectorAll(".installation-stage__column");
-        if (window.innerWidth <= 992) columns[0].classList.add("installation-stage__column_active");
+        function getFirstColumn() {
+            return columns.length > 0 ? columns[0] : null;
+        }
+        if (window.innerWidth <= 992) {
+            const firstColumn = getFirstColumn();
+            if (firstColumn) firstColumn.classList.add("installation-stage__column_active");
+        }
         titles.forEach((title => {
             title.addEventListener("click", (function() {
                 const column = this.closest(".installation-stage__column");
+                if (!column) return;
                 if (window.innerWidth <= 992) columns.forEach((col => {
-                    if (col !== column) col.classList.remove("installation-stage__column_active");
+                    if (col && col !== column) col.classList.remove("installation-stage__column_active");
                 }));
                 column.classList.toggle("installation-stage__column_active");
             }));
         }));
         window.addEventListener("resize", (function() {
+            const firstColumn = getFirstColumn();
+            if (!firstColumn) return;
+            const activeColumn = document.querySelector(".installation-stage__column_active");
             if (window.innerWidth <= 992) {
-                const activeColumn = document.querySelector(".installation-stage__column_active");
-                if (!activeColumn) columns[0].classList.add("installation-stage__column_active");
-            } else columns[0].classList.remove("installation-stage__column_active");
+                if (!activeColumn) firstColumn.classList.add("installation-stage__column_active");
+            } else firstColumn.classList.remove("installation-stage__column_active");
         }));
         window["FLS"] = false;
         menuInit();
