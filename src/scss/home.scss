@@ -159,6 +159,11 @@
         h2 {
             font-weight: 300;
             margin: 0px 0px 30px 0px;
+            @media (max-width: 768px) {
+                font-size: 20px;
+                line-height: 135%;
+                margin: 0px 0px 18px 0px;
+            }
         }
     }
     // .consulting-services__body
@@ -171,7 +176,7 @@
             margin: 0px 0px 50px 0px;
         }
         @media (max-width: $mobile) {
-            margin: 0px 0px 30px 0px;
+            margin: 0px 0px 40px 0px;
         }
         &:last-child {
             margin: 0px 0px 0px 0px;
@@ -186,11 +191,11 @@
         font-size: 18px;
         color: #2a2a2a;
         @media (max-width: $mobile) {
-            font-size: 14px;
-            margin: 0px 0px 20px 0px;
-        }
-        @media (max-width: $mobileSmall) {
+            font-size: 16px;
+            margin: 0px 0px 25px 0px;
+            flex-direction: column-reverse;
             text-align: center;
+            align-items: center;
             justify-content: center;
         }
         span {
@@ -205,8 +210,9 @@
             flex: 1 1 auto;
             margin: 0px 0px 5px 20px;
             border: 1px solid #dbdbdb;
-            @media (max-width: $mobile) {
-                display: none;
+            @media (max-width: 768px) {
+                width: calc(100% + 30px);
+                margin: 0px -15px 20px -15px;
             }
         }
     }
@@ -215,10 +221,11 @@
         display: flex;
         //flex-wrap: wrap;
         margin: -10px;
-        @media (max-width: $mobileSmall) {
-            flex-direction: column;
-
-            margin: -10px 0px;
+        @media (max-width: $mobile) {
+            padding: 0px 10px;
+        }
+        @media (max-width: 400px) {
+            padding: 0px 0px 0px 0px;
         }
     }
     // .consulting-services__item
@@ -238,12 +245,7 @@
             flex: 0 1 33.3333%;
         }
         @media (max-width: $mobile) {
-            flex: 0 1 50%;
-        }
-        @media (max-width: $mobileSmall) {
             align-items: center;
-            flex: 1 1 auto;
-            padding: 10px 0px;
         }
         span {
             font-size: 24px;
@@ -255,9 +257,13 @@
             }
             @media (max-width: $mobile) {
                 font-size: 18px;
+                text-align: center;
             }
             @media (max-width: $mobileSmall) {
-                text-align: center;
+                font-size: 15px;
+            }
+            @media (max-width: 400px) {
+                font-size: 14px;
             }
         }
     }
@@ -273,7 +279,16 @@
             height: 117px;
         }
         @media (max-width: $mobile) {
+            height: 90px;
+            margin: 0px 0px 15px 0px;
+            a {
+                display: flex;
+                height: 90px;
+            }
+        }
+        @media (max-width: 400px) {
             height: 80px;
+            margin: 0px 0px 15px 0px;
             a {
                 display: flex;
                 height: 80px;
@@ -292,10 +307,9 @@
             margin: 65px 0px 0px 0px;
         }
         @media (max-width: $mobile) {
-            margin: 30px 0px 0px 0px;
-        }
-        @media (max-width: $mobileSmall) {
-            width: 100%;
+            margin: 20px 0px 0px 0px;
+            width: 140px;
+            padding: 14px 22px;
         }
     }
 }
