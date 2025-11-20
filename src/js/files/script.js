@@ -310,20 +310,29 @@ document.addEventListener('DOMContentLoaded', function () {
 const titles = document.querySelectorAll('.installation-stage__title');
 const columns = document.querySelectorAll('.installation-stage__column');
 
+// Функция для безопасного доступа к columns[0]
+function getFirstColumn() {
+    return columns.length > 0 ? columns[0] : null;
+}
+
 // На мобильных устройствах активируем первую колонку
 if (window.innerWidth <= 992) {
-    columns[0].classList.add('installation-stage__column_active');
+    const firstColumn = getFirstColumn();
+    if (firstColumn) {
+        firstColumn.classList.add('installation-stage__column_active');
+    }
 }
 
 // Обработчик клика на заголовок
 titles.forEach(title => {
     title.addEventListener('click', function () {
         const column = this.closest('.installation-stage__column');
+        if (!column) return;
 
         // Если на мобильных - закрываем все кроме текущего
         if (window.innerWidth <= 992) {
             columns.forEach(col => {
-                if (col !== column) {
+                if (col && col !== column) {
                     col.classList.remove('installation-stage__column_active');
                 }
             });
@@ -336,14 +345,19 @@ titles.forEach(title => {
 
 // Обработчик изменения размера окна
 window.addEventListener('resize', function () {
+    const firstColumn = getFirstColumn();
+    if (!firstColumn) return;
+
+    const activeColumn = document.querySelector('.installation-stage__column_active');
+
     if (window.innerWidth <= 992) {
         // На мобильных - активируем первую колонку если ни одна не активна
-        const activeColumn = document.querySelector('.installation-stage__column_active');
         if (!activeColumn) {
-            columns[0].classList.add('installation-stage__column_active');
+            firstColumn.classList.add('installation-stage__column_active');
         }
     } else {
         // На десктопе - убираем принудительную активацию первой колонки
-        columns[0].classList.remove('installation-stage__column_active');
+        firstColumn.classList.remove('installation-stage__column_active');
     }
 });
+

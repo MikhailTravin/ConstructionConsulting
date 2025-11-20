@@ -306,7 +306,6 @@ export function tabs() {
 		});
 	}
 
-	// Остальные функции остаются без изменений
 	function setTitlePosition(tabsMediaArray, matchMedia) {
 		tabsMediaArray.forEach(tabsMediaItem => {
 			tabsMediaItem = tabsMediaItem.item;
@@ -412,14 +411,43 @@ export function tabs() {
 		if (el.closest('[data-tabs-title]')) {
 			const tabTitle = el.closest('[data-tabs-title]');
 			const tabsBlock = tabTitle.closest('[data-tabs]');
+
 			if (!tabTitle.classList.contains('_tab-active') && !tabsBlock.querySelector('._slide')) {
 				let tabActiveTitle = tabsBlock.querySelectorAll('[data-tabs-title]._tab-active');
 				tabActiveTitle.length ? tabActiveTitle = Array.from(tabActiveTitle).filter(item => item.closest('[data-tabs]') === tabsBlock) : null;
 				tabActiveTitle.length ? tabActiveTitle[0].classList.remove('_tab-active') : null;
 				tabTitle.classList.add('_tab-active');
 				setTabsStatus(tabsBlock);
+
+				// Для спойлеров прокручиваем к верху кликнутого тайтла
+				if (tabsBlock.classList.contains('_tab-spoller')) {
+					// Определяем длительность анимации для текущего блока
+					function getTabsAnimate(tabsBlock) {
+						if (tabsBlock.hasAttribute('data-tabs-animate')) {
+							return tabsBlock.dataset.tabsAnimate > 0 ? Number(tabsBlock.dataset.tabsAnimate) : 500;
+						}
+						return 0;
+					}
+
+					const currentTabsAnimate = getTabsAnimate(tabsBlock);
+
+					// Ждем завершения анимации и прокручиваем к тайтлу
+					setTimeout(() => {
+						// Получаем высоту шапки
+						const header = document.querySelector('header');
+						const headerHeight = header ? header.offsetHeight : 0;
+
+						// Получаем позицию элемента относительно документа
+						const elementTop = tabTitle.getBoundingClientRect().top + window.pageYOffset;
+
+						// Прокручиваем с учетом высоты шапки
+						window.scrollTo({
+							top: elementTop - headerHeight - 20, // 20px дополнительный отступ
+							behavior: 'smooth'
+						});
+					}, currentTabsAnimate + 50);
+				}
 			}
-			e.preventDefault();
 		}
 	}
 }
