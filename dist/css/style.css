@@ -6536,6 +6536,17 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
     gap: 15px;
   }
 
+  .consulting-services__content h2 {
+    font-size: 20px;
+    line-height: 135%;
+    margin: 0px 0px 18px 0px;
+  }
+
+  .consulting-services__title::after {
+    width: calc(100% + 30px);
+    margin: 0px -15px 20px -15px;
+  }
+
   .tabs__slide-title {
     font-size: 15px;
     font-weight: 700;
@@ -6802,41 +6813,56 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
   }
 
   .consulting-services__column {
-    margin: 0px 0px 30px 0px;
+    margin: 0px 0px 40px 0px;
   }
 
   .consulting-services__title {
-    font-size: 14px;
-    margin: 0px 0px 20px 0px;
+    font-size: 16px;
+    margin: 0px 0px 25px 0px;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: reverse;
+        -ms-flex-direction: column-reverse;
+            flex-direction: column-reverse;
+    text-align: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
   }
 
-  .consulting-services__title::after {
-    display: none;
+  .consulting-services__items {
+    padding: 0px 10px;
   }
 
   .consulting-services__item {
-    -webkit-box-flex: 0;
-        -ms-flex: 0 1 50%;
-            flex: 0 1 50%;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
   }
 
   .consulting-services__item span {
     font-size: 18px;
+    text-align: center;
   }
 
   .consulting-services__icon {
-    height: 80px;
+    height: 90px;
+    margin: 0px 0px 15px 0px;
   }
 
   .consulting-services__icon a {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
-    height: 80px;
+    height: 90px;
   }
 
   .consulting-services__button {
-    margin: 30px 0px 0px 0px;
+    margin: 20px 0px 0px 0px;
+    width: 140px;
+    padding: 14px 22px;
   }
 
   .banner-sale__content {
@@ -7504,42 +7530,13 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
     width: 100%;
   }
 
-  .consulting-services__title {
-    text-align: center;
-    -webkit-box-pack: center;
-        -ms-flex-pack: center;
-            justify-content: center;
-  }
-
   .consulting-services__title span {
     width: 100%;
     text-align: center;
   }
 
-  .consulting-services__items {
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    margin: -10px 0px;
-  }
-
-  .consulting-services__item {
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    -webkit-box-flex: 1;
-        -ms-flex: 1 1 auto;
-            flex: 1 1 auto;
-    padding: 10px 0px;
-  }
-
   .consulting-services__item span {
-    text-align: center;
-  }
-
-  .consulting-services__button {
-    width: 100%;
+    font-size: 15px;
   }
 
   .banner-sale__content {
@@ -7657,6 +7654,26 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
 }
 
 @media (max-width: 400px) {
+  .consulting-services__items {
+    padding: 0px 0px 0px 0px;
+  }
+
+  .consulting-services__item span {
+    font-size: 14px;
+  }
+
+  .consulting-services__icon {
+    height: 80px;
+    margin: 0px 0px 15px 0px;
+  }
+
+  .consulting-services__icon a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 80px;
+  }
+
   .tabs__title span {
     min-height: 40px;
     font-size: 12px;
