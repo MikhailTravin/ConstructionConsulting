@@ -125,7 +125,7 @@
 							<label for="tel2">Введите номер телефона</label>
 							<div class="form-popup__input input-phone">
 								<input data-required id="tel2" autocomplete="off" type="text" name="form[]"
-									value="99999999" class="phone">
+									value="+7(999)-999-99-99" class="phone">
 							</div>
 						</div>
 						<div class="form-popup__inputs">
@@ -147,6 +147,16 @@
 									value="sergey@mosproektkompleks.ru">
 							</div>
 							<div class="form-popup__placeholder-bottom">Адрес электронной почты</div>
+						</div>
+						<div class="form-popup__inputs">
+							<select name="form[]" class="select" data-placeholder="Регион*"
+								data-placeholder-class="my-placeholder-class">
+								<option value="" disabled selected>Регион*</option>
+								<option value="2">Регион1</option>
+								<option value="3">Регион2</option>
+								<option value="4">Регион3</option>
+							</select>
+							<div class="form-popup__placeholder-bottom">* обязательные поля</div>
 						</div>
 					</div>
 					<div class="form-popup__passwords">
