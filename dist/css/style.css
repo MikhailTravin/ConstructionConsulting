@@ -3335,9 +3335,6 @@ h2 {
 }
 
 .tabs__slide {
-  -webkit-box-flex: 1;
-      -ms-flex: 1 1 calc(25% - 10px);
-          flex: 1 1 calc(25% - 10px);
   padding: 0px 10px;
   border-radius: 10px;
   background-color: #f7f7f7;
@@ -3970,14 +3967,22 @@ h2 {
 }
 
 .main-documents .banner {
-  min-height: 555px;
+  height: 100%;
   -webkit-box-pack: start;
       -ms-flex-pack: start;
           justify-content: start;
 }
 
 .main-documents .banner__bg {
-  height: 555px;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+.main-documents .banner__container {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  position: relative;
 }
 
 .main-documents .banner__body {
@@ -5823,6 +5828,9 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
   }
 
   .tabs__slide {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 calc(25% - 10px);
+            flex: 1 1 calc(25% - 10px);
     padding: 7px 2px;
     border: 1px solid transparent;
     background-color: transparent;

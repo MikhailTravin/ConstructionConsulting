@@ -7516,7 +7516,7 @@
                             const wrapper = slider.querySelector(".swiper-wrapper");
                             if (wrapper) {
                                 wrapper.removeAttribute("style");
-                                wrapper.classList.remove("swiper-wrapper", "swiper-wrapper-vertical", "swiper-wrapper-horizontal");
+                                wrapper.classList.remove("swiper-wrapper");
                             }
                             slider.querySelectorAll(".swiper-slide").forEach((slide => {
                                 slide.removeAttribute("style");
@@ -7577,7 +7577,7 @@
                                     slidesPerView: 5
                                 },
                                 1650: {
-                                    slidesPerView: 7
+                                    slidesPerView: 4
                                 }
                             }
                         });
@@ -7591,13 +7591,11 @@
                                     const parentTabs = slider.closest(".tabs__sliders");
                                     const bottomTabs = parentTabs.nextElementSibling;
                                     if (bottomTabs && bottomTabs.classList.contains("bottom-tabs")) {
+                                        bottomTabs.querySelectorAll(".bottom-tabs__column").forEach((col => {
+                                            col.classList.remove("_active");
+                                        }));
                                         const correspondingColumn = bottomTabs.querySelector(`.bottom-tabs__column[data-id="${firstSlideId}"]`);
-                                        if (correspondingColumn) {
-                                            bottomTabs.querySelectorAll(".bottom-tabs__column").forEach((col => {
-                                                col.classList.remove("_active");
-                                            }));
-                                            correspondingColumn.classList.add("_active");
-                                        }
+                                        if (correspondingColumn) correspondingColumn.classList.add("_active");
                                     }
                                 }
                                 slider.dataset.initialized = "true";
@@ -7609,24 +7607,13 @@
                     const wrapper = swiperInstance.el.querySelector(".swiper-wrapper");
                     const slides = swiperInstance.slides;
                     const currentBreakpoint = swiperInstance.currentBreakpoint;
-                    if (wrapper && slides.length < 7 && "1650" === currentBreakpoint) wrapper.classList.add("_few-slides"); else wrapper.classList.remove("_few-slides");
+                    if (wrapper && slides.length < 7 && 1650 === currentBreakpoint) wrapper.classList.add("_few-slides"); else wrapper.classList.remove("_few-slides");
                 }
                 function checkNavigation(swiperInstance) {
                     if (!prevButton || !nextButton) return;
-                    const slides = swiperInstance.slides;
-                    const currentBreakpoint = swiperInstance.currentBreakpoint;
-                    swiperInstance.params.slidesPerView;
-                    const isDocumentsSlider = swiperInstance.el.classList.contains("documents-tabs-slider");
-                    if (isDocumentsSlider && "1650" === currentBreakpoint && slides.length < 8) {
-                        prevButton.classList.add("swiper-button-disabled", "swiper-button-lock");
-                        nextButton.classList.add("swiper-button-disabled", "swiper-button-lock");
-                    } else if (!isDocumentsSlider && "1650" === currentBreakpoint && slides.length < 7) {
-                        prevButton.classList.add("swiper-button-disabled", "swiper-button-lock");
-                        nextButton.classList.add("swiper-button-disabled", "swiper-button-lock");
-                    } else {
-                        if (swiperInstance.isBeginning) prevButton.classList.add("swiper-button-disabled"); else prevButton.classList.remove("swiper-button-disabled");
-                        if (swiperInstance.isEnd) nextButton.classList.add("swiper-button-disabled"); else nextButton.classList.remove("swiper-button-disabled");
-                    }
+                    swiperInstance.slides;
+                    swiperInstance.currentBreakpoint;
+                    swiperInstance.el.classList.contains("documents-tabs-slider");
                 }
                 function initSlideClicks() {
                     const slides = slider.querySelectorAll(".tabs__slide");
@@ -7660,8 +7647,6 @@
         }
         document.addEventListener("DOMContentLoaded", (function() {
             initTabsSliders();
-        }));
-        function reinitTabsSliders() {
             const tabButtons = document.querySelectorAll("[data-tabs-title]");
             tabButtons.forEach((button => {
                 button.addEventListener("click", (function() {
@@ -7670,10 +7655,6 @@
                     }), 100);
                 }));
             }));
-        }
-        document.addEventListener("DOMContentLoaded", (function() {
-            initTabsSliders();
-            reinitTabsSliders();
         }));
         let addWindowScrollEvent = false;
         function headerScroll() {
