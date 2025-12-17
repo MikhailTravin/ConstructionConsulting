@@ -86,21 +86,22 @@ function initTabsSliders() {
 
 			let swiper = null;
 
-			// Функция для инициализации или уничтожения слайдера
 			function initOrDestroySwiper() {
 				const windowWidth = window.innerWidth;
 				const isDocumentsSlider = slider.classList.contains('documents-tabs-slider');
 
 				if (windowWidth < 992) {
-					// Уничтожаем слайдер если он существует
+					// Уничтожаем Swiper на мобильных
 					if (swiper) {
 						swiper.destroy(true, true);
 						swiper = null;
+
+						// Очистка классов Swiper
 						slider.classList.remove('swiper-initialized', 'swiper-horizontal', 'swiper-backface-hidden');
 						const wrapper = slider.querySelector('.swiper-wrapper');
 						if (wrapper) {
 							wrapper.removeAttribute('style');
-							wrapper.classList.remove('swiper-wrapper', 'swiper-wrapper-vertical', 'swiper-wrapper-horizontal');
+							wrapper.classList.remove('swiper-wrapper');
 						}
 						slider.querySelectorAll('.swiper-slide').forEach(slide => {
 							slide.removeAttribute('style');
@@ -108,9 +109,10 @@ function initTabsSliders() {
 						});
 					}
 				} else {
-					// Инициализируем слайдер если его нет
+					// Инициализация на десктопе
 					if (!swiper) {
 						const config = {
+							// Уберите эту строку, если Swiper подключён глобально (не через ESM)
 							modules: [Navigation],
 							observer: true,
 							observeParents: true,
@@ -137,7 +139,6 @@ function initTabsSliders() {
 							}
 						};
 
-						// Разные настройки для разных типов слайдеров
 						if (isDocumentsSlider) {
 							Object.assign(config, {
 								slidesPerView: 8,
@@ -155,18 +156,18 @@ function initTabsSliders() {
 									479.98: { slidesPerView: 2 },
 									767.98: { slidesPerView: 3 },
 									991.98: { slidesPerView: 5 },
-									1650: { slidesPerView: 7 },
+									1650: { slidesPerView: 4 },
 								}
 							});
 						}
 
 						swiper = new Swiper(slider, config);
 
-						// Инициализация кликов по слайдам только для обычных слайдеров
+						// Только для обычных слайдеров
 						if (!isDocumentsSlider) {
 							initSlideClicks();
 
-							// Инициализация активного слайда
+							// Активация первого слайда при инициализации
 							if (!slider.dataset.initialized) {
 								const firstSlide = slider.querySelector('.tabs__slide');
 								if (firstSlide) {
@@ -175,11 +176,11 @@ function initTabsSliders() {
 									const bottomTabs = parentTabs.nextElementSibling;
 
 									if (bottomTabs && bottomTabs.classList.contains('bottom-tabs')) {
+										bottomTabs.querySelectorAll('.bottom-tabs__column').forEach(col => {
+											col.classList.remove('_active');
+										});
 										const correspondingColumn = bottomTabs.querySelector(`.bottom-tabs__column[data-id="${firstSlideId}"]`);
 										if (correspondingColumn) {
-											bottomTabs.querySelectorAll('.bottom-tabs__column').forEach(col => {
-												col.classList.remove('_active');
-											});
 											correspondingColumn.classList.add('_active');
 										}
 									}
@@ -191,54 +192,27 @@ function initTabsSliders() {
 				}
 			}
 
-			// Функция для проверки количества слайдов
 			function checkSlidesCount(swiperInstance) {
 				const wrapper = swiperInstance.el.querySelector('.swiper-wrapper');
 				const slides = swiperInstance.slides;
 				const currentBreakpoint = swiperInstance.currentBreakpoint;
 
-				if (wrapper && slides.length < 7 && currentBreakpoint === '1650') {
+				if (wrapper && slides.length < 7 && currentBreakpoint === 1650) {
 					wrapper.classList.add('_few-slides');
 				} else {
 					wrapper.classList.remove('_few-slides');
 				}
 			}
 
-			// Функция для проверки и блокировки навигации
 			function checkNavigation(swiperInstance) {
 				if (!prevButton || !nextButton) return;
 
 				const slides = swiperInstance.slides;
 				const currentBreakpoint = swiperInstance.currentBreakpoint;
-				const slidesPerView = swiperInstance.params.slidesPerView;
 				const isDocumentsSlider = swiperInstance.el.classList.contains('documents-tabs-slider');
-
-				// Для documents слайдера проверяем если слайдов меньше 8
-				if (isDocumentsSlider && currentBreakpoint === '1650' && slides.length < 8) {
-					prevButton.classList.add('swiper-button-disabled', 'swiper-button-lock');
-					nextButton.classList.add('swiper-button-disabled', 'swiper-button-lock');
-				}
-				// Для обычного слайдера проверяем если слайдов меньше 7
-				else if (!isDocumentsSlider && currentBreakpoint === '1650' && slides.length < 7) {
-					prevButton.classList.add('swiper-button-disabled', 'swiper-button-lock');
-					nextButton.classList.add('swiper-button-disabled', 'swiper-button-lock');
-				} else {
-					// Стандартное поведение Swiper
-					if (swiperInstance.isBeginning) {
-						prevButton.classList.add('swiper-button-disabled');
-					} else {
-						prevButton.classList.remove('swiper-button-disabled');
-					}
-
-					if (swiperInstance.isEnd) {
-						nextButton.classList.add('swiper-button-disabled');
-					} else {
-						nextButton.classList.remove('swiper-button-disabled');
-					}
-				}
+				const isMaxBreakpoint = currentBreakpoint === 1650;
 			}
 
-			// Функция для обработки кликов по слайдам (только для обычных слайдеров)
 			function initSlideClicks() {
 				const slides = slider.querySelectorAll('.tabs__slide');
 				slides.forEach(slide => {
@@ -264,10 +238,10 @@ function initTabsSliders() {
 				}
 			}
 
-			// Инициализация при первой загрузке
+			// Первая инициализация
 			initOrDestroySwiper();
 
-			// Обработчик изменения размера окна с троттлингом
+			// Обработчик resize с троттлингом
 			let resizeTimeout;
 			function handleResize() {
 				clearTimeout(resizeTimeout);
@@ -281,25 +255,17 @@ function initTabsSliders() {
 	}
 }
 
+// Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function () {
 	initTabsSliders();
-});
 
-// Дополнительно: переинициализация слайдеров при переключении вкладок
-function reinitTabsSliders() {
+	// Переинициализация при переключении вкладок
 	const tabButtons = document.querySelectorAll('[data-tabs-title]');
-
 	tabButtons.forEach(button => {
 		button.addEventListener('click', function () {
-			// Небольшая задержка чтобы дать время на переключение вкладки
 			setTimeout(() => {
 				initTabsSliders();
 			}, 100);
 		});
 	});
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-	initTabsSliders();
-	reinitTabsSliders();
 });
