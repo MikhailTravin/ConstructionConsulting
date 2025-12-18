@@ -1911,6 +1911,8 @@ h2 {
   left: 0;
   width: 100%;
   height: 722px;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 
 .banner__container {
@@ -5575,11 +5577,6 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
 }
 
 @media (max-width: 1920px) {
-  .banner__bg {
-    -o-object-fit: cover;
-       object-fit: cover;
-  }
-
   .images-product__thumb {
     height: 100%;
   }
