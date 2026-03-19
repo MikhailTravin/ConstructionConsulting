@@ -1683,6 +1683,16 @@ h2 {
   display: none;
 }
 
+.bottom-header__content .top-header__column.mob {
+  display: none;
+}
+
+.header._header-scroll .bottom-header__content .top-header__column.mob {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
 .footer {
   padding: 30px 0px;
 }
@@ -5777,6 +5787,10 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
 }
 
 @media (max-width: 992px) {
+  .header._header-scroll .bottom-header__content .top-header__column.mob {
+    display: none;
+  }
+
   .tabs__title::before {
     display: none;
   }
