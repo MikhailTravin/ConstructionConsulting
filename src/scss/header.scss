@@ -626,3 +626,19 @@
 		}
 	}
 }
+
+.top-header__button {
+	&.mob {
+		display: none;
+	}
+}
+.header._header-scroll {
+	.top-header__button {
+		&.mob {
+			display: flex;
+			@media (max-width: 992px) {
+				display: none;
+			}
+		}
+	}
+}
