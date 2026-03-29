@@ -139,6 +139,77 @@
     }
 }
 
+.banner__container {
+    position: relative;
+}
+.banner__titles {
+    position: absolute;
+    left: 8px;
+    font-size: 83px;
+    line-height: 90%;
+    text-transform: uppercase;
+    color: #ffffff;
+    font-weight: 300;
+    z-index: 15;
+    max-width: 400px;
+    top: 196px;
+    @media (max-width: 992px) {
+        display: none;
+    }
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -40px;
+        width: 100%;
+        height: calc(100% + 20px);
+        background: rgba(0, 0, 0, 0.588);
+        filter: blur(20px);
+        z-index: -1;
+    }
+    span {
+        font-weight: 700;
+        color: #ed1c29;
+    }
+}
+
+.leader-banner2 {
+    .leader__content {
+        width: 100%;
+    }
+    .leader__images {
+        flex: 0 1 490px;
+        @media (max-width: 768px) {
+            flex: 1 1 auto;
+        }
+    }
+    .leader__text {
+        flex: 0 1 470px;
+        @media (max-width: 768px) {
+            flex: 1 1 auto;
+        }
+    }
+    .leader__title {
+        font-size: 18px;
+        line-height: 110%;
+        text-transform: uppercase;
+        color: #2c2c2c;
+        font-weight: 700;
+        margin: 0px 0px 20px 0px;
+    }
+    .leader__desc {
+        bottom: 45px;
+        right: -85px;
+        padding: 15px 35px 15px 40px;
+        @media (max-width: 1100px) {
+            right: -10px;
+        }
+        @media (max-width: 480px) {
+            bottom: 20px;
+        }
+    }
+}
+
 //========================================================================================================================================================
 
 .consulting-services {
