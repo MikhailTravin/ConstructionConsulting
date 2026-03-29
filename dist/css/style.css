@@ -2036,6 +2036,72 @@ h2 {
   margin: 0px 0px 0px -10px;
 }
 
+.banner__container {
+  position: relative;
+}
+
+.banner__titles {
+  position: absolute;
+  left: 8px;
+  font-size: 83px;
+  line-height: 90%;
+  text-transform: uppercase;
+  color: #ffffff;
+  font-weight: 300;
+  z-index: 15;
+  max-width: 400px;
+  top: 196px;
+}
+
+.banner__titles::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40px;
+  width: 100%;
+  height: calc(100% + 20px);
+  background: rgba(0, 0, 0, 0.588);
+  -webkit-filter: blur(20px);
+          filter: blur(20px);
+  z-index: -1;
+}
+
+.banner__titles span {
+  font-weight: 700;
+  color: #ed1c29;
+}
+
+.leader-banner2 .leader__content {
+  width: 100%;
+}
+
+.leader-banner2 .leader__images {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 1 490px;
+          flex: 0 1 490px;
+}
+
+.leader-banner2 .leader__text {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 1 470px;
+          flex: 0 1 470px;
+}
+
+.leader-banner2 .leader__title {
+  font-size: 18px;
+  line-height: 110%;
+  text-transform: uppercase;
+  color: #2c2c2c;
+  font-weight: 700;
+  margin: 0px 0px 20px 0px;
+}
+
+.leader-banner2 .leader__desc {
+  bottom: 45px;
+  right: -85px;
+  padding: 15px 35px 15px 40px;
+}
+
 .consulting-services {
   padding: 40px 0px 50px 0px;
 }
@@ -5796,12 +5862,22 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
   }
 }
 
+@media (max-width: 1100px) {
+  .leader-banner2 .leader__desc {
+    right: -10px;
+  }
+}
+
 @media (max-width: 992px) {
   .header._header-scroll .bottom-header__content .top-header__column.mob {
     display: none;
   }
 
   .header._header-scroll .top-header__button.mob {
+    display: none;
+  }
+
+  .banner__titles {
     display: none;
   }
 
@@ -6567,6 +6643,18 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
 
   .form-popup__buttons {
     gap: 15px;
+  }
+
+  .leader-banner2 .leader__images {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+  }
+
+  .leader-banner2 .leader__text {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
   }
 
   .consulting-services__content h2 {
@@ -7479,6 +7567,10 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
 }
 
 @media (max-width: 480px) {
+  .leader-banner2 .leader__desc {
+    bottom: 20px;
+  }
+
   .bottom-tabs__descr .bottom-tabs__image-mob img {
     width: 60%;
   }
