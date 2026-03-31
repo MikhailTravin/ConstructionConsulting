@@ -142,6 +142,7 @@
 .banner__container {
     position: relative;
 }
+
 .banner__titles {
     position: absolute;
     left: 8px;
@@ -155,6 +156,12 @@
     top: 196px;
     @media (max-width: 992px) {
         display: none;
+        position: relative;
+        padding: 20px 0px;
+        text-align: center;
+        font-size: 45px;
+        top: 0;
+        left: 0;
     }
     &::before {
         content: "";
@@ -166,10 +173,22 @@
         background: rgba(0, 0, 0, 0.588);
         filter: blur(20px);
         z-index: -1;
+        @media (max-width: 992px) {
+            display: none;
+        }
     }
     span {
         font-weight: 700;
         color: #ed1c29;
+    }
+}
+.banner__body {
+    .banner__titles {
+        display: none;
+        @media (max-width: 992px) {
+            display: flex;
+            flex-direction: column;
+        }
     }
 }
 
