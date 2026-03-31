@@ -2071,6 +2071,10 @@ h2 {
   color: #ed1c29;
 }
 
+.banner__body .banner__titles {
+  display: none;
+}
+
 .leader-banner2 .leader__content {
   width: 100%;
 }
@@ -5879,6 +5883,26 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item:not(.lg-zoomable).lg-co
 
   .banner__titles {
     display: none;
+    position: relative;
+    padding: 20px 0px;
+    text-align: center;
+    font-size: 45px;
+    top: 0;
+    left: 0;
+  }
+
+  .banner__titles::before {
+    display: none;
+  }
+
+  .banner__body .banner__titles {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
   }
 
   .tabs__title::before {
